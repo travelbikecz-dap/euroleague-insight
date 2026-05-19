@@ -21,6 +21,9 @@ class MatchUpScreen extends StatelessWidget {
     final Standing awayStanding = mockStandings.firstWhere(
       (standing) => standing.team.name == game.awayTeam.name,
     );
+    
+    final double homeWinProbability = 64;
+    final double awayWinProbability = 36;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -131,15 +134,69 @@ class MatchUpScreen extends StatelessWidget {
                     const SizedBox(height: 20),
 
                     Center(
-                      child: Text(
-                        '${game.homeTeam.name} 64% • ${game.awayTeam.name} 36%',
-                        style: const TextStyle(
-                          color: Colors.orange,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+
+                                children: [
+
+                                  Column(
+                                    children: [
+
+                                      const Text(
+                                        'HOME',
+                                        style: TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 8),
+
+                                      Text(
+                                        '${homeWinProbability.round()}%',
+                                        style: const TextStyle(
+                                          color: Colors.orange,
+                                          fontSize: 52,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  Container(
+                                    width: 1,
+                                    height: 70,
+                                    color: Colors.white12,
+                                  ),
+
+                                  Column(
+                                    children: [
+
+                                      const Text(
+                                        'AWAY',
+                                        style: TextStyle(
+                                          color: Colors.white54,
+                                          fontSize: 12,
+                                          letterSpacing: 1,
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 8),
+
+                                      Text(
+                                        '${awayWinProbability.round()}%',
+                                        style: const TextStyle(
+                                          color: Colors.orange,
+                                          fontSize: 52,
+                                          fontWeight: FontWeight.bold,
+                         ),
                       ),
-                    ),
+                   ],
+                 ),
+             ],
+      ),
+ ),
 
                     const SizedBox(height: 30),
 
