@@ -145,8 +145,9 @@ class MatchUpScreen extends StatelessWidget {
                                       const Text(
                                         'HOME',
                                         style: TextStyle(
-                                          color: Colors.white54,
-                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
                                           letterSpacing: 1,
                                         ),
                                       ),
@@ -176,8 +177,9 @@ class MatchUpScreen extends StatelessWidget {
                                       const Text(
                                         'AWAY',
                                         style: TextStyle(
-                                          color: Colors.white54,
-                                          fontSize: 12,
+                                          color: Colors.white,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
                                           letterSpacing: 1,
                                         ),
                                       ),
@@ -201,7 +203,7 @@ class MatchUpScreen extends StatelessWidget {
                     const SizedBox(height: 30),
 
                     SizedBox(
-                      height: 190,
+                      height: 135,
 
                       child: ListView(
                         scrollDirection: Axis.horizontal,
@@ -266,7 +268,7 @@ class MatchUpScreen extends StatelessWidget {
                       _getInsight(homeStanding, awayStanding),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
-                        color: Colors.white70,
+                        color: Colors.white,
                         fontSize: 16,
                       ),
                     ),
@@ -329,7 +331,7 @@ class MatchUpScreen extends StatelessWidget {
           Text(
             title,
             style: const TextStyle(
-              color: Colors.white70,
+              color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
