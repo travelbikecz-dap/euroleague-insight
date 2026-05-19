@@ -155,42 +155,49 @@ class MatchUpScreen extends StatelessWidget {
                             'WINS',
                             homeStanding.wins,
                             awayStanding.wins,
+                            false,
                           ),
 
                           _buildStatCard(
                             'LOSSES',
                             homeStanding.losses,
                             awayStanding.losses,
+                            true,
                           ),
 
                           _buildStatCard(
                           'OFF RTG',
                           118,
                           111,
+                          false,
                         ),
 
                         _buildStatCard(
                           'DEF RTG',
                           102,
                           108,
+                          true,
                         ),
 
                         _buildStatCard(
                           'PACE',
                           74,
                           71,
+                          false,
                         ),
 
                           _buildStatCard(
                             'POINTS FOR',
                             homeStanding.pointsFor,
                             awayStanding.pointsFor,
+                            false,
                           ),
 
                           _buildStatCard(
                             'POINTS AGAINST',
                             homeStanding.pointsAgainst,
                             awayStanding.pointsAgainst,
+                            true,
                           ),
                         ],
                       ),
@@ -199,7 +206,7 @@ class MatchUpScreen extends StatelessWidget {
                     const SizedBox(height: 30),
 
                     Text(
-                      '${game.homeTeam.name} arrives with better offensive efficiency and stronger recent form.',
+                      _getInsight(homeStanding, awayStanding),
                       textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white70,
@@ -220,17 +227,31 @@ class MatchUpScreen extends StatelessWidget {
     String title,
     int homeValue,
     int awayValue,
+    bool lowerIsBetter,
   ) {
 
     Color homeColor = Colors.white;
     Color awayColor = Colors.white;
 
-    if (homeValue > awayValue) {
-      homeColor = Colors.green;
-      awayColor = Colors.red;
-    } else if (awayValue > homeValue) {
-      homeColor = Colors.red;
-      awayColor = Colors.green;
+    if (!lowerIsBetter) {
+
+      if (homeValue > awayValue) {
+        homeColor = Colors.green;
+        awayColor = Colors.red;
+      } else if (awayValue > homeValue) {
+        homeColor = Colors.red;
+        awayColor = Colors.green;
+      }
+
+    } else {
+
+      if (homeValue < awayValue) {
+        homeColor = Colors.green;
+        awayColor = Colors.red;
+      } else if (awayValue < homeValue) {
+        homeColor = Colors.red;
+        awayColor = Colors.green;
+      }
     }
 
     return Container(
@@ -294,4 +315,19 @@ class MatchUpScreen extends StatelessWidget {
       ),
     );
   }
+}
+String _getInsight(
+  Standing home,
+  Standing away,
+) {
+
+  if (home.wins > away.wins) {
+    return '${home.team.name} comes into this matchup with stronger overall form and better season consistency.';
+  }
+
+  if (away.wins > home.wins) {
+    return '${away.team.name} has shown stronger results recently and appears more competitive statistically.';
+  }
+
+  return 'Both teams arrive with very similar performance levels, making this matchup highly balanced.';
 }
