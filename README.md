@@ -1,4 +1,4 @@
-# euroliga_predictor
+# EuroLeague Insight
 
 A new Flutter project.
 
