@@ -101,7 +101,7 @@ final List<TeamStats> mockTeamStats = [
   ),
 
   TeamStats(
-    teamName: 'Maccabi Tel Aviv',
+    teamName: 'Maccabi',
     logo: 'assets/logos/maccabi.png',
     ppg: 84.8,
     rebounds: 32.9,
@@ -115,7 +115,7 @@ final List<TeamStats> mockTeamStats = [
   ),
 
   TeamStats(
-    teamName: 'Virtus Bologna',
+    teamName: 'Virtus',
     logo: 'assets/logos/virtus.png',
     ppg: 79.4,
     rebounds: 34.0,
@@ -171,7 +171,7 @@ final List<TeamStats> mockTeamStats = [
   ),
 
   TeamStats(
-    teamName: 'Bayern Munich',
+    teamName: 'Bayern',
     logo: 'assets/logos/munich.png',
     ppg: 80.6,
     rebounds: 33.7,
@@ -199,7 +199,7 @@ final List<TeamStats> mockTeamStats = [
   ),
 
   TeamStats(
-    teamName: 'Valencia Basket',
+    teamName: 'Valencia',
     logo: 'assets/logos/valencia.png',
     ppg: 82.7,
     rebounds: 32.6,
@@ -213,7 +213,7 @@ final List<TeamStats> mockTeamStats = [
   ),
 
   TeamStats(
-    teamName: 'Olimpia Milano',
+    teamName: 'Milano',
     logo: 'assets/logos/milano.png',
     ppg: 79.8,
     rebounds: 33.3,
@@ -241,7 +241,7 @@ final List<TeamStats> mockTeamStats = [
   ),
 
   TeamStats(
-    teamName: 'Paris Basketball',
+    teamName: 'Paris',
     logo: 'assets/logos/paris.png',
     ppg: 88.2,
     rebounds: 30.4,
@@ -255,7 +255,7 @@ final List<TeamStats> mockTeamStats = [
   ),
 
   TeamStats(
-    teamName: 'Dubai BC',
+    teamName: 'Dubai',
     logo: 'assets/logos/dubai.png',
     ppg: 81.4,
     rebounds: 34.5,
@@ -269,7 +269,7 @@ final List<TeamStats> mockTeamStats = [
   ),
 
   TeamStats(
-    teamName: 'Hapoel Tel Aviv',
+    teamName: 'Hapoel',
     logo: 'assets/logos/hapoel.png',
     ppg: 84.0,
     rebounds: 32.2,

@@ -12,6 +12,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  final PageController _pageController = PageController();
 
   final List<Widget> _screens = const [
     GamesScreen(),
@@ -26,10 +27,22 @@ class _HomeScreenState extends State<HomeScreen> {
 ];
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+
+    _pageController.animateToPage(
+
+    index,
+
+    duration: const Duration(milliseconds: 300),
+
+    curve: Curves.easeInOut,
+  );
+
+  setState(() {
+
+    _selectedIndex = index;
+
+  });
+}
 
 @override
 Widget build(BuildContext context) {
@@ -44,7 +57,17 @@ Widget build(BuildContext context) {
       centerTitle: true,
     ),
 
-    body: _screens[_selectedIndex],
+    body: PageView(
+      controller: _pageController,
+      
+      onPageChanged: (index) {
+          setState(() {
+              _selectedIndex = index;
+          });
+      },
+      
+      children: _screens,
+    ),
 
     bottomNavigationBar: BottomNavigationBar(
       backgroundColor: Colors.black,
