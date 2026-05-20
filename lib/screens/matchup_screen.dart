@@ -14,12 +14,14 @@ class MatchUpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final Standing homeStanding = mockStandings.firstWhere(
-      (standing) => standing.team.name == game.homeTeam.name,
+    final homeStanding = mockStandings.firstWhere(
+    (standing) => standing.team.name == game.homeTeam.name,
+    orElse: () => mockStandings.first,
     );
 
-    final Standing awayStanding = mockStandings.firstWhere(
+    final awayStanding = mockStandings.firstWhere(
       (standing) => standing.team.name == game.awayTeam.name,
+      orElse: () => mockStandings.first,
     );
     
     final double homeWinProbability = 64;

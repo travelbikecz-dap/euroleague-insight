@@ -19,44 +19,58 @@ class _HomeScreenState extends State<HomeScreen> {
     TeamsScreen(),
   ];
 
+  final List<String> _titles = [
+  'Games',
+  'Standings',
+  'Teams',
+];
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Colors.black,
+
+    appBar: AppBar(
+      title: Text(
+        _titles[_selectedIndex],
+      ),
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        title: const Text("Euro League Insight"),
-        backgroundColor: Colors.black,
-      ),
-      body: _screens[_selectedIndex],
+      centerTitle: true,
+    ),
 
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.orange,
-        unselectedItemColor: Colors.grey,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+    body: _screens[_selectedIndex],
 
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.sports_basketball),
-            label: 'Games',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.leaderboard),
-            label: 'Standings',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.groups),
-            label: 'Teams',
-          ),
-        ],
-      ),
-    );
-  }
+    bottomNavigationBar: BottomNavigationBar(
+      backgroundColor: Colors.black,
+      selectedItemColor: Colors.orange,
+      unselectedItemColor: Colors.grey,
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+
+      items: const [
+
+        BottomNavigationBarItem(
+          icon: Icon(Icons.sports_basketball),
+          label: 'Games',
+        ),
+
+        BottomNavigationBarItem(
+          icon: Icon(Icons.leaderboard),
+          label: 'Standings',
+        ),
+
+        BottomNavigationBarItem(
+          icon: Icon(Icons.groups),
+          label: 'Teams',
+        ),
+      ],
+    ),
+  );
+}
 }
