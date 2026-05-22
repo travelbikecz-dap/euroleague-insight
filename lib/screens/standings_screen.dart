@@ -8,68 +8,51 @@ class StandingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return ListView.builder(
-
       itemCount: mockStandings.length,
 
       itemBuilder: (context, index) {
-
         final standing = mockStandings[index];
 
         Color cardColor = const Color(0xFF1C1C1E);
 
         if (index <= 5) {
-
-          cardColor =
-              const Color(0xFF1E88E5).withOpacity(0.80);
-
+          cardColor = const Color(0xFF1E88E5).withOpacity(0.80);
         } else if (index <= 9) {
-
-          cardColor =
-              const Color(0xFFFB8C00).withOpacity(0.80);
+          cardColor = const Color(0xFFFB8C00).withOpacity(0.80);
         }
 
         return InkWell(
-
           onTap: () {
-
             Navigator.push(
-
               context,
 
               MaterialPageRoute(
-
-                builder: (context) => TeamDetailScreen(
-
-                  team: mockTeamStats.firstWhere(
+                builder: (context) {
+                  final selectedIndex = mockTeamStats.indexWhere(
                     (team) => team.teamName == standing.team.name,
-                    orElse: () => mockTeamStats[0]
-                  ),
-                ),
+                  );
+
+                  return TeamDetailScreen(
+                    teams: mockTeamStats,
+                    initialIndex: selectedIndex,
+                  );
+                },
               ),
             );
           },
 
           child: Card(
-
             color: cardColor,
 
-            margin: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
-            ),
+            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
 
             child: ListTile(
-
               leading: Row(
-
                 mainAxisSize: MainAxisSize.min,
 
                 children: [
-
                   Text(
-
                     '${index + 1}.',
 
                     style: const TextStyle(
@@ -82,15 +65,12 @@ class StandingsScreen extends StatelessWidget {
                   const SizedBox(width: 10),
 
                   Image.asset(
-
                     standing.team.logo,
 
                     width: 40,
                     height: 40,
 
-                    errorBuilder:
-                        (context, error, stackTrace) {
-
+                    errorBuilder: (context, error, stackTrace) {
                       return const Icon(
                         Icons.sports_basketball,
                         color: Colors.orange,
@@ -101,46 +81,31 @@ class StandingsScreen extends StatelessWidget {
               ),
 
               title: Text(
-
                 standing.team.name,
 
-                style: const TextStyle(
-                  color: Colors.white,
-                ),
+                style: const TextStyle(color: Colors.white),
               ),
 
               subtitle: Text(
-
                 'W: ${standing.wins} | L: ${standing.losses}',
 
-                style: const TextStyle(
-                  color: Colors.white,
-                ),
+                style: const TextStyle(color: Colors.white),
               ),
 
               trailing: Column(
-
-                mainAxisAlignment:
-                    MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
 
                 children: [
-
                   Text(
-
                     'PF: ${standing.pointsFor}',
 
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(color: Colors.white),
                   ),
 
                   Text(
-
                     'PA: ${standing.pointsAgainst}',
 
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
+                    style: const TextStyle(color: Colors.white),
                   ),
                 ],
               ),
