@@ -29,12 +29,18 @@ class StandingsScreen extends StatelessWidget {
 
               MaterialPageRoute(
                 builder: (context) {
-                  final selectedIndex = mockTeamStats.indexWhere(
+                  final orderedTeamStats = mockStandings.map((standing) {
+                    return mockTeamStats.firstWhere(
+                      (stats) => stats.teamName == standing.team.name,
+                    );
+                  }).toList();
+
+                  final selectedIndex = orderedTeamStats.indexWhere(
                     (team) => team.teamName == standing.team.name,
                   );
 
                   return TeamDetailScreen(
-                    teams: mockTeamStats,
+                    teams: orderedTeamStats,
                     initialIndex: selectedIndex,
                   );
                 },

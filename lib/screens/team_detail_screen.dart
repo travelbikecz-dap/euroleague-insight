@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/team_stats.dart';
+import '../data/mock_standings.dart';
 
 class TeamDetailScreen extends StatefulWidget {
   final List<TeamStats> teams;
@@ -38,14 +39,19 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
       itemCount: widget.teams.length,
       itemBuilder: (context, index) {
         final team = widget.teams[index];
+        final previousTeam = index > 0 ? widget.teams[index - 1] : null;
+
+        final nextTeam = index < widget.teams.length - 1
+            ? widget.teams[index + 1]
+            : null;
+
+        final position =
+            mockStandings.indexWhere((s) => s.team.name == team.teamName) + 1;
 
         return Scaffold(
           backgroundColor: Colors.black,
 
-          appBar: AppBar(
-            backgroundColor: Colors.black,
-            title: Text(team.teamName),
-          ),
+          appBar: AppBar(backgroundColor: Colors.black),
 
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(20),
@@ -54,9 +60,63 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
 
               children: [
-                Image.asset(team.logo, width: 120, height: 120),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          previousTeam != null
+                              ? '‹ ${previousTeam.teamName}'
+                              : '',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
 
-                const SizedBox(height: 20),
+                      Expanded(
+                        child: Text(
+                          nextTeam != null ? '${nextTeam.teamName} ›' : '',
+                          textAlign: TextAlign.right,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                SizedBox(
+                  height: 140,
+                  width: double.infinity,
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Image.asset(team.logo, width: 120, height: 120),
+                      ),
+
+                      Positioned(
+                        left: 20,
+                        top: 35,
+                        child: Text(
+                          '${position}.',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 48,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
                 Text(
                   team.teamName,
