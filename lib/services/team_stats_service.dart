@@ -1,26 +1,16 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
+import '../data/mock_team_stats.dart';
+import '../models/team_stats.dart';
 
 class TeamStatsService {
+  List<TeamStats> getAllTeams() {
+    return mockTeamStats;
+  }
 
-  Future<void> fetchTeams() async {
-
-    final url = Uri.parse(
-      'https://dummyjson.com/users',
-    );
-
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-
-      final data = jsonDecode(response.body);
-
-      print(data['users'][0]['firstName']);
-
-    } else {
-
-      print('ERROR: ${response.statusCode}');
+  TeamStats? getTeamByName(String teamName) {
+    try {
+      return mockTeamStats.firstWhere((team) => team.teamName == teamName);
+    } catch (_) {
+      return null;
     }
   }
 }
