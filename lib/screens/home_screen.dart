@@ -11,7 +11,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2;
   final PageController _pageController = PageController();
 
   final List<Widget> _screens = const [
@@ -20,80 +20,66 @@ class _HomeScreenState extends State<HomeScreen> {
     TeamsScreen(),
   ];
 
-  final List<String> _titles = [
-  'Games',
-  'Standings',
-  'Teams',
-];
+  final List<String> _titles = ['Games', 'Standings', 'Teams'];
 
   void _onItemTapped(int index) {
-
     _pageController.animateToPage(
+      index,
 
-    index,
+      duration: const Duration(milliseconds: 300),
 
-    duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
 
-    curve: Curves.easeInOut,
-  );
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
-  setState(() {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
 
-    _selectedIndex = index;
-
-  });
-}
-
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Colors.black,
-
-    appBar: AppBar(
-      title: Text(
-        _titles[_selectedIndex],
+      appBar: AppBar(
+        title: Text(_titles[_selectedIndex]),
+        backgroundColor: Colors.black,
+        centerTitle: true,
       ),
-      backgroundColor: Colors.black,
-      centerTitle: true,
-    ),
 
-    body: PageView(
-      controller: _pageController,
-      
-      onPageChanged: (index) {
+      body: PageView(
+        controller: _pageController,
+
+        onPageChanged: (index) {
           setState(() {
-              _selectedIndex = index;
+            _selectedIndex = index;
           });
-      },
-      
-      children: _screens,
-    ),
+        },
 
-    bottomNavigationBar: BottomNavigationBar(
-      backgroundColor: Colors.black,
-      selectedItemColor: Colors.orange,
-      unselectedItemColor: Colors.grey,
-      currentIndex: _selectedIndex,
-      onTap: _onItemTapped,
+        children: _screens,
+      ),
 
-      items: const [
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Colors.black,
+        selectedItemColor: Colors.orange,
+        unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
 
-        BottomNavigationBarItem(
-          icon: Icon(Icons.sports_basketball),
-          label: 'Games',
-        ),
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.sports_basketball),
+            label: 'Games',
+          ),
 
-        BottomNavigationBarItem(
-          icon: Icon(Icons.leaderboard),
-          label: 'Standings',
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.leaderboard),
+            label: 'Standings',
+          ),
 
-        BottomNavigationBarItem(
-          icon: Icon(Icons.groups),
-          label: 'Teams',
-        ),
-      ],
-    ),
-  );
-}
+          BottomNavigationBarItem(icon: Icon(Icons.groups), label: 'Teams'),
+        ],
+      ),
+    );
+  }
 }

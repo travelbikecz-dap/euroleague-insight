@@ -1,122 +1,150 @@
 import 'package:flutter/material.dart';
 import '../data/mock_standings.dart';
 import 'team_detail_screen.dart';
+import '../services/standings_service.dart';
+import '../models/standing.dart';
 import '../data/mock_team_stats.dart';
 
-class StandingsScreen extends StatelessWidget {
+class StandingsScreen extends StatefulWidget {
   const StandingsScreen({super.key});
 
   @override
+  State<StandingsScreen> createState() => _StandingsScreenState();
+}
+
+class _StandingsScreenState extends State<StandingsScreen> {
+  late Future<List<Standing>> standings;
+
+  @override
+  void initState() {
+    super.initState();
+
+    standings = StandingsService().getStandings();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: mockStandings.length,
+    return FutureBuilder<List<Standing>>(
+      future: standings,
 
-      itemBuilder: (context, index) {
-        final standing = mockStandings[index];
-
-        Color cardColor = const Color(0xFF1C1C1E);
-
-        if (index <= 5) {
-          cardColor = const Color(0xFF1E88E5).withOpacity(0.80);
-        } else if (index <= 9) {
-          cardColor = const Color(0xFFFB8C00).withOpacity(0.80);
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
         }
 
-        return InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
+        final standingsList = snapshot.data!;
 
-              MaterialPageRoute(
-                builder: (context) {
-                  final orderedTeamStats = mockStandings.map((standing) {
-                    return mockTeamStats.firstWhere(
-                      (stats) => stats.teamName == standing.team.name,
-                    );
-                  }).toList();
+        return ListView.builder(
+          itemCount: standingsList.length,
 
-                  final selectedIndex = orderedTeamStats.indexWhere(
-                    (team) => team.teamName == standing.team.name,
-                  );
+          itemBuilder: (context, index) {
+            final standing = standingsList[index];
 
-                  return TeamDetailScreen(
-                    teams: orderedTeamStats,
-                    initialIndex: selectedIndex,
-                  );
-                },
-              ),
-            );
-          },
+            Color cardColor = const Color(0xFF1C1C1E);
 
-          child: Card(
-            color: cardColor,
+            if (index <= 5) {
+              cardColor = const Color(0xFF1E88E5).withOpacity(0.80);
+            } else if (index <= 9) {
+              cardColor = const Color(0xFFFB8C00).withOpacity(0.80);
+            }
 
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            return InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
 
-            child: ListTile(
-              leading: Row(
-                mainAxisSize: MainAxisSize.min,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      final orderedTeamStats = mockStandings.map((standing) {
+                        return mockTeamStats.firstWhere(
+                          (stats) => stats.teamName == standing.team.name,
+                        );
+                      }).toList();
 
-                children: [
-                  Text(
-                    '${index + 1}.',
+                      final selectedIndex = orderedTeamStats.indexWhere(
+                        (team) => team.teamName == standing.team.name,
+                      );
 
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                    ),
-                  ),
-
-                  const SizedBox(width: 10),
-
-                  Image.asset(
-                    standing.team.logo,
-
-                    width: 40,
-                    height: 40,
-
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
-                        Icons.sports_basketball,
-                        color: Colors.orange,
+                      return TeamDetailScreen(
+                        teams: orderedTeamStats,
+                        initialIndex: selectedIndex,
                       );
                     },
                   ),
-                ],
-              ),
+                );
+              },
 
-              title: Text(
-                standing.team.name,
+              child: Card(
+                color: cardColor,
 
-                style: const TextStyle(color: Colors.white),
-              ),
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
 
-              subtitle: Text(
-                'W: ${standing.wins} | L: ${standing.losses}',
+                child: ListTile(
+                  leading: Row(
+                    mainAxisSize: MainAxisSize.min,
 
-                style: const TextStyle(color: Colors.white),
-              ),
+                    children: [
+                      Text(
+                        '${index + 1}.',
 
-              trailing: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
 
-                children: [
-                  Text(
-                    'PF: ${standing.pointsFor}',
+                      const SizedBox(width: 10),
+
+                      Image.network(
+                        standing.team.logo,
+
+                        width: 40,
+                        height: 40,
+
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.sports_basketball,
+                            color: Colors.orange,
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+
+                  title: Text(
+                    standing.team.name,
 
                     style: const TextStyle(color: Colors.white),
                   ),
 
-                  Text(
-                    'PA: ${standing.pointsAgainst}',
+                  subtitle: Text(
+                    'W: ${standing.wins} | L: ${standing.losses}',
 
                     style: const TextStyle(color: Colors.white),
                   ),
-                ],
+
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+
+                    children: [
+                      Text(
+                        'PF: ${standing.pointsFor}',
+
+                        style: const TextStyle(color: Colors.white),
+                      ),
+
+                      Text(
+                        'PA: ${standing.pointsAgainst}',
+
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );

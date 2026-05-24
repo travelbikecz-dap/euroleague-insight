@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../models/team_stats.dart';
 import '../services/team_stats_service.dart';
 
@@ -40,7 +39,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
       },
 
       itemBuilder: (context, index) {
-        final TeamStats team = teams[index];
+        final team = teams[index];
 
         return Container(
           key: ValueKey(team.teamName),
