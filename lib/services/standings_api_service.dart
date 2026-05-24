@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 class StandingsApiService {
   Future<List<Standing>> fetchStandings() async {
     final url = Uri.parse(
-      'https://api-live.euroleague.net/v3/competitions/E/seasons/E2025/rounds/1/basicstandings',
+      'https://api-live.euroleague.net/v3/competitions/E/seasons/E2025/rounds/38/basicstandings',
     );
 
     final response = await http.get(url);
@@ -30,7 +30,7 @@ class StandingsApiService {
         ),
       );
     }
-
+    print('ROUND TEST -> ${standings.first.team.name}');
     return standings;
   }
 }
