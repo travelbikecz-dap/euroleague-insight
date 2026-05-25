@@ -4,6 +4,7 @@ import 'team_detail_screen.dart';
 import '../services/standings_service.dart';
 import '../models/standing.dart';
 import '../data/mock_team_stats.dart';
+import '../data/team_names.dart';
 
 class StandingsScreen extends StatefulWidget {
   const StandingsScreen({super.key});
@@ -28,6 +29,15 @@ class _StandingsScreenState extends State<StandingsScreen> {
       future: standings,
 
       builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'ERROR: ${snapshot.error}',
+              style: const TextStyle(color: Colors.white),
+            ),
+          );
+        }
+
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
@@ -62,7 +72,9 @@ class _StandingsScreenState extends State<StandingsScreen> {
                       }).toList();
 
                       final selectedIndex = orderedTeamStats.indexWhere(
-                        (team) => team.teamName == standing.team.name,
+                        (team) =>
+                            team.teamName ==
+                            TeamNames.shortName(standing.team.name),
                       );
 
                       return TeamDetailScreen(
