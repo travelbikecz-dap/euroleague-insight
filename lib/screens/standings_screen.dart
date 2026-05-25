@@ -125,7 +125,7 @@ class _StandingsScreenState extends State<StandingsScreen> {
                   ),
 
                   title: Text(
-                    standing.team.name,
+                    TeamNames.shortName(standing.team.name),
 
                     style: const TextStyle(color: Colors.white),
                   ),
