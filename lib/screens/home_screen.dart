@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'games_screen.dart';
 import 'standings_screen.dart';
 import 'teams_screen.dart';
+import 'about_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,6 +46,19 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(_titles[_selectedIndex]),
         backgroundColor: Colors.black,
         centerTitle: true,
+
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline),
+
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              );
+            },
+          ),
+        ],
       ),
 
       body: PageView(
