@@ -5,6 +5,7 @@ import '../services/standings_service.dart';
 import '../models/standing.dart';
 import '../data/mock_team_stats.dart';
 import '../data/team_names.dart';
+import '../services/standings_api_service.dart';
 
 class StandingsScreen extends StatefulWidget {
   const StandingsScreen({super.key});
@@ -20,7 +21,10 @@ class _StandingsScreenState extends State<StandingsScreen> {
   void initState() {
     super.initState();
 
-    standings = StandingsService().getStandings();
+    print('🔥 STANDINGS INIT');
+
+    standings = StandingsApiService()
+        .fetchStandings(); // StandingsApiService().testResultsEndpoint();
   }
 
   @override
