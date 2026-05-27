@@ -145,4 +145,136 @@ class StandingsApiService {
         return 'assets/logos/euroleague.png';
     }
   }
+
+  String getApiTeamName(String teamName) {
+    switch (teamName.toLowerCase()) {
+      case 'olympiacos':
+        return 'Olympiacos Piraeus';
+
+      case 'real madrid':
+        return 'Real Madrid';
+
+      case 'fenerbahce':
+        return 'Fenerbahce Beko Istanbul';
+
+      case 'barcelona':
+        return 'FC Barcelona';
+
+      case 'baskonia':
+        return 'Kosner Baskonia Vitoria-Gasteiz';
+
+      case 'virtus':
+        return 'Virtus Bologna';
+
+      case 'partizan':
+        return 'Partizan Mozzart Bet Belgrade';
+
+      case 'crvena zvezda':
+        return 'Crvena Zvezda Meridianbet Belgrade';
+
+      case 'maccabi':
+        return 'Maccabi Rapyd Tel Aviv';
+
+      case 'anadolu efes':
+        return 'Anadolu Efes Istanbul';
+
+      case 'panathinaikos':
+        return 'Panathinaikos AKTOR Athens';
+
+      case 'zalgiris':
+        return 'Zalgiris Kaunas';
+
+      case 'monaco':
+        return 'AS Monaco';
+
+      case 'milano':
+        return 'EA7 Emporio Armani Milan';
+
+      case 'paris':
+        return 'Paris Basketball';
+
+      case 'bayern':
+        return 'FC Bayern Munich';
+
+      case 'valencia':
+        return 'Valencia Basket';
+
+      case 'asvel':
+        return 'LDLC ASVEL Villeurbanne';
+
+      case 'hapoel':
+        return 'Hapoel IBI Tel Aviv';
+
+      case 'dubai':
+        return 'Dubai Basketball';
+
+      default:
+        return teamName;
+    }
+  }
+
+  Future<List<String>> getRecentForm(String teamName) async {
+    final apiTeamName = getApiTeamName(teamName).toLowerCase();
+    print('API TEAM NAME: $apiTeamName');
+
+    final url = Uri.parse(
+      'https://api-live.euroleague.net/v1/results/?seasonCode=E2025',
+    );
+
+    final response = await http.get(url);
+
+    final document = XmlDocument.parse(response.body);
+
+    print(response.body.substring(0, 1000));
+
+    final games = document.findAllElements('game');
+
+    List<String> form = [];
+
+    for (final game in games) {
+      final homeTeam = game
+          .findElements('hometeam')
+          .first
+          .innerText
+          .toLowerCase();
+
+      final awayTeam = game
+          .findElements('awayteam')
+          .first
+          .innerText
+          .toLowerCase();
+
+      final homeScore =
+          int.tryParse(game.findElements('homescore').first.innerText) ?? 0;
+
+      final awayScore =
+          int.tryParse(game.findElements('awayscore').first.innerText) ?? 0;
+
+      final played = game.findElements('played').first.innerText == 'true';
+
+      if (!played) continue;
+
+      bool isTeamPlaying = homeTeam == apiTeamName || awayTeam == apiTeamName;
+
+      if (!isTeamPlaying) continue;
+
+      bool isWin = false;
+
+      if (homeTeam == apiTeamName) {
+        isWin = homeScore > awayScore;
+      } else {
+        isWin = awayScore > homeScore;
+      }
+
+      form.add(isWin ? 'W' : 'L');
+    }
+
+    if (form.length > 5) {
+      form = form.sublist(form.length - 5);
+    }
+
+    print('Form For $teamName: $form');
+
+    return form;
+  }
 }

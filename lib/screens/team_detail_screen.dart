@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/team_stats.dart';
 import '../data/mock_standings.dart';
+import '../services/standings_api_service.dart';
 
 class TeamDetailScreen extends StatefulWidget {
   final List<TeamStats> teams;
@@ -19,11 +20,17 @@ class TeamDetailScreen extends StatefulWidget {
 class _TeamDetailScreenState extends State<TeamDetailScreen> {
   late final PageController _pageController;
 
+  late Future<List<String>> recentForm;
+
   @override
   void initState() {
     super.initState();
 
     _pageController = PageController(initialPage: widget.initialIndex);
+
+    recentForm = StandingsApiService().getRecentForm(
+      widget.teams[widget.initialIndex].teamName,
+    );
   }
 
   @override
@@ -125,6 +132,58 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
                   ),
+                ),
+
+                const SizedBox(height: 20),
+
+                FutureBuilder<List<String>>(
+                  future: StandingsApiService().getRecentForm(team.teamName),
+
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const CircularProgressIndicator();
+                    }
+
+                    final form = snapshot.data!;
+
+                    return Column(
+                      children: [
+                        const Text(
+                          'LAST 5',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+
+                          children: List.generate(form.length, (index) {
+                            final result = form[index];
+
+                            return Container(
+                              width: 44,
+                              height: 44,
+
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+
+                              alignment: Alignment.center,
+
+                              child: Text(
+                                result == 'W' ? '✅' : '❌',
+
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 30),

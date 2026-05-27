@@ -51,7 +51,7 @@ Combining:
 ## Standings
 
 - [x] Automatic latest round detection
-- [ ] Remove dependency on mock standings
+- [x] Remove dependency on mock standings
 
 ## Team Detail
 
