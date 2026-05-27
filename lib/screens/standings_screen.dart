@@ -112,7 +112,7 @@ class _StandingsScreenState extends State<StandingsScreen> {
 
                       const SizedBox(width: 10),
 
-                      Image.network(
+                      Image.asset(
                         standing.team.logo,
 
                         width: 40,

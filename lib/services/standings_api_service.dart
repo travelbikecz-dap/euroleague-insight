@@ -19,11 +19,12 @@ class StandingsApiService {
     final List<Standing> standings = [];
 
     for (final team in data['teams']) {
+      print('TEAM NAME: ${team['club']['name']}');
       standings.add(
         Standing(
           team: Team(
             name: team['club']['name'],
-            logo: team['club']['images']['crest'],
+            logo: getLocalLogo(team['club']['name']),
           ),
           wins: team['gamesWon'],
           losses: team['gamesLost'],
@@ -76,5 +77,72 @@ class StandingsApiService {
     }
 
     return 38;
+  }
+
+  String getLocalLogo(String teamName) {
+    switch (teamName.toLowerCase()) {
+      case 'real madrid':
+        return 'assets/logos/real_madrid.png';
+
+      case 'olympiacos piraeus':
+        return 'assets/logos/olympiacos.png';
+
+      case 'fenerbahce beko istanbul':
+        return 'assets/logos/fenerbahce.png';
+
+      case 'fc barcelona':
+        return 'assets/logos/barcelona.png';
+
+      case 'kosner baskonia vitoria-gasteiz':
+        return 'assets/logos/baskonia.png';
+
+      case 'virtus bologna':
+        return 'assets/logos/virtus.png';
+
+      case 'partizan mozzart bet belgrade':
+        return 'assets/logos/partizan.png';
+
+      case 'crvena zvezda meridianbet belgrade':
+        return 'assets/logos/crvena.png';
+
+      case 'maccabi rapyd tel aviv':
+        return 'assets/logos/maccabi.png';
+
+      case 'anadolu efes istanbul':
+        return 'assets/logos/anadolu.png';
+
+      case 'panathinaikos aktor athens':
+        return 'assets/logos/panathinaikos.png';
+
+      case 'zalgiris kaunas':
+        return 'assets/logos/zalgiris.png';
+
+      case 'as monaco':
+        return 'assets/logos/monaco.png';
+
+      case 'ea7 emporio armani milan':
+        return 'assets/logos/milano.png';
+
+      case 'paris basketball':
+        return 'assets/logos/paris.png';
+
+      case 'fc bayern munich':
+        return 'assets/logos/munich.png';
+
+      case 'valencia basket':
+        return 'assets/logos/valencia.png';
+
+      case 'ldlc asvel villeurbanne':
+        return 'assets/logos/lyon.png';
+
+      case 'hapoel ibi tel aviv':
+        return 'assets/logos/hapoel.png';
+
+      case 'dubai basketball':
+        return 'assets/logos/dubai.png';
+
+      default:
+        return 'assets/logos/euroleague.png';
+    }
   }
 }
