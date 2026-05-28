@@ -21,8 +21,6 @@ class _StandingsScreenState extends State<StandingsScreen> {
   void initState() {
     super.initState();
 
-    print('🔥 STANDINGS INIT');
-
     standings = StandingsApiService()
         .fetchStandings(); // StandingsApiService().testResultsEndpoint();
   }
@@ -154,6 +152,40 @@ class _StandingsScreenState extends State<StandingsScreen> {
                         'PA: ${standing.pointsAgainst}',
 
                         style: const TextStyle(color: Colors.white),
+                      ),
+
+                      const SizedBox(height: 4),
+
+                      FutureBuilder<List<String>>(
+                        future: StandingsApiService().getRecentForm(
+                          standing.team.name,
+                        ),
+
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const SizedBox();
+                          }
+
+                          final form = snapshot.data!;
+
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
+
+                            children: form.map((result) {
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 1,
+                                ),
+
+                                child: Text(
+                                  result == 'W' ? '✅' : '❌',
+
+                                  style: const TextStyle(fontSize: 10),
+                                ),
+                              );
+                            }).toList(),
+                          );
+                        },
                       ),
                     ],
                   ),

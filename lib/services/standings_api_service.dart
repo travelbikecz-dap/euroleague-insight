@@ -7,9 +7,10 @@ import 'package:xml/xml.dart';
 class StandingsApiService {
   Future<List<Standing>> fetchStandings() async {
     final standingRound = await getLatestValidStandingsRound();
+    final seasonCode = getCurrentSeasonCode();
 
     final url = Uri.parse(
-      'https://api-live.euroleague.net/v3/competitions/E/seasons/E2025/rounds/$standingRound/basicstandings',
+      'https://api-live.euroleague.net/v3/competitions/E/seasons/$seasonCode/rounds/$standingRound/basicstandings',
     );
 
     final response = await http.get(url);
@@ -19,7 +20,6 @@ class StandingsApiService {
     final List<Standing> standings = [];
 
     for (final team in data['teams']) {
-      print('TEAM NAME: ${team['club']['name']}');
       standings.add(
         Standing(
           team: Team(
@@ -38,8 +38,9 @@ class StandingsApiService {
   }
 
   Future<int> getLatestValidStandingsRound() async {
+    final seasonCode = getCurrentSeasonCode();
     final resultsUrl = Uri.parse(
-      'https://api-live.euroleague.net/v1/results/?seasonCode=E2025',
+      'https://api-live.euroleague.net/v1/results/?seasonCode=$seasonCode',
     );
 
     final resultsResponse = await http.get(resultsUrl);
@@ -60,7 +61,7 @@ class StandingsApiService {
 
     for (int round = maxRound; round >= 1; round--) {
       final standingsUrl = Uri.parse(
-        'https://api-live.euroleague.net/v3/competitions/E/seasons/E2025/rounds/$round/basicstandings',
+        'https://api-live.euroleague.net/v3/competitions/E/seasons/$seasonCode/rounds/$round/basicstandings',
       );
 
       final standingsResponse = await http.get(standingsUrl);
@@ -215,21 +216,20 @@ class StandingsApiService {
 
   Future<List<String>> getRecentForm(String teamName) async {
     final apiTeamName = getApiTeamName(teamName).toLowerCase();
-    print('API TEAM NAME: $apiTeamName');
+
+    final seasonCode = getCurrentSeasonCode();
 
     final url = Uri.parse(
-      'https://api-live.euroleague.net/v1/results/?seasonCode=E2025',
+      'https://api-live.euroleague.net/v1/results/?seasonCode=$seasonCode',
     );
 
     final response = await http.get(url);
 
     final document = XmlDocument.parse(response.body);
 
-    print(response.body.substring(0, 1000));
-
     final games = document.findAllElements('game');
 
-    List<String> form = [];
+    List<Map<String, dynamic>> gamesData = [];
 
     for (final game in games) {
       final homeTeam = game
@@ -252,7 +252,11 @@ class StandingsApiService {
 
       final played = game.findElements('played').first.innerText == 'true';
 
+      final round = game.findElements('round').first.innerText;
+
       if (!played) continue;
+
+      if (round != 'RS') continue;
 
       bool isTeamPlaying = homeTeam == apiTeamName || awayTeam == apiTeamName;
 
@@ -266,15 +270,37 @@ class StandingsApiService {
         isWin = awayScore > homeScore;
       }
 
-      form.add(isWin ? 'W' : 'L');
+      final gameday =
+          int.tryParse(game.findElements('gameday').first.innerText) ?? 0;
+
+      gamesData.add({'gameday': gameday, 'result': isWin ? 'W' : 'L'});
     }
+
+    gamesData.sort((a, b) => a['gameday'].compareTo(b['gameday']));
+
+    List<String> form = gamesData
+        .map((game) => game['result'] as String)
+        .toList();
 
     if (form.length > 5) {
       form = form.sublist(form.length - 5);
     }
 
-    print('Form For $teamName: $form');
-
     return form;
   }
+}
+
+String getCurrentSeasonCode() {
+  final now = DateTime.now();
+
+  int seasonYear;
+
+  // EuroLeague season starts around September
+  if (now.month >= 9) {
+    seasonYear = now.year;
+  } else {
+    seasonYear = now.year - 1;
+  }
+
+  return 'E$seasonYear';
 }
