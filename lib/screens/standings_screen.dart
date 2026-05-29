@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import '../data/mock_standings.dart';
 import 'team_detail_screen.dart';
-import '../services/standings_service.dart';
+import '../services/team_stats_service.dart';
 import '../models/standing.dart';
-import '../data/mock_team_stats.dart';
+import '../models/team_stats.dart';
 import '../data/team_names.dart';
 import '../services/standings_api_service.dart';
 
@@ -16,20 +15,19 @@ class StandingsScreen extends StatefulWidget {
 
 class _StandingsScreenState extends State<StandingsScreen> {
   late Future<List<Standing>> standings;
+  late Future<List<TeamStats>> teamStats;
 
   @override
   void initState() {
     super.initState();
-
-    standings = StandingsApiService()
-        .fetchStandings(); // StandingsApiService().testResultsEndpoint();
+    standings = StandingsApiService().fetchStandings();
+    teamStats = TeamStatsService().getAllTeams();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Standing>>(
       future: standings,
-
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(
@@ -48,7 +46,6 @@ class _StandingsScreenState extends State<StandingsScreen> {
 
         return ListView.builder(
           itemCount: standingsList.length,
-
           itemBuilder: (context, index) {
             final standing = standingsList[index];
 
@@ -61,61 +58,46 @@ class _StandingsScreenState extends State<StandingsScreen> {
             }
 
             return InkWell(
-              onTap: () {
+              onTap: () async {
+                final stats = await teamStats;
+                if (!context.mounted) return;
+
+                final selectedIndex = stats.indexWhere(
+                  (team) => team.clubCode == standing.clubCode,
+                );
+
+                if (selectedIndex == -1) return;
+
                 Navigator.push(
                   context,
-
                   MaterialPageRoute(
-                    builder: (context) {
-                      final orderedTeamStats = mockStandings.map((standing) {
-                        return mockTeamStats.firstWhere(
-                          (stats) => stats.teamName == standing.team.name,
-                        );
-                      }).toList();
-
-                      final selectedIndex = orderedTeamStats.indexWhere(
-                        (team) =>
-                            team.teamName ==
-                            TeamNames.shortName(standing.team.name),
-                      );
-
-                      return TeamDetailScreen(
-                        teams: orderedTeamStats,
-                        initialIndex: selectedIndex,
-                      );
-                    },
+                    builder: (context) => TeamDetailScreen(
+                      teams: stats,
+                      initialIndex: selectedIndex,
+                    ),
                   ),
                 );
               },
-
               child: Card(
                 color: cardColor,
-
                 margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-
                 child: ListTile(
                   leading: Row(
                     mainAxisSize: MainAxisSize.min,
-
                     children: [
                       Text(
                         '${index + 1}.',
-
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
                       ),
-
                       const SizedBox(width: 10),
-
                       Image.asset(
                         standing.team.logo,
-
                         width: 40,
                         height: 40,
-
                         errorBuilder: (context, error, stackTrace) {
                           return const Icon(
                             Icons.sports_basketball,
@@ -125,67 +107,37 @@ class _StandingsScreenState extends State<StandingsScreen> {
                       ),
                     ],
                   ),
-
                   title: Text(
                     TeamNames.shortName(standing.team.name),
-
                     style: const TextStyle(color: Colors.white),
                   ),
-
                   subtitle: Text(
                     'W: ${standing.wins} | L: ${standing.losses}',
-
                     style: const TextStyle(color: Colors.white),
                   ),
-
                   trailing: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-
                     children: [
                       Text(
                         'PF: ${standing.pointsFor}',
-
                         style: const TextStyle(color: Colors.white),
                       ),
-
                       Text(
                         'PA: ${standing.pointsAgainst}',
-
                         style: const TextStyle(color: Colors.white),
                       ),
-
                       const SizedBox(height: 4),
-
-                      FutureBuilder<List<String>>(
-                        future: StandingsApiService().getRecentForm(
-                          standing.team.name,
-                        ),
-
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData) {
-                            return const SizedBox();
-                          }
-
-                          final form = snapshot.data!;
-
-                          return Row(
-                            mainAxisSize: MainAxisSize.min,
-
-                            children: form.map((result) {
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 1,
-                                ),
-
-                                child: Text(
-                                  result == 'W' ? '✅' : '❌',
-
-                                  style: const TextStyle(fontSize: 10),
-                                ),
-                              );
-                            }).toList(),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: standing.last5Form.map((result) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 1),
+                            child: Text(
+                              result == 'W' ? '✅' : '❌',
+                              style: const TextStyle(fontSize: 10),
+                            ),
                           );
-                        },
+                        }).toList(),
                       ),
                     ],
                   ),
