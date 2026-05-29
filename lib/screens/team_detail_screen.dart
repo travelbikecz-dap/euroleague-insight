@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/team_stats.dart';
-
+import '../widgets/team_roster_section.dart';
 class TeamDetailScreen extends StatefulWidget {
   final List<TeamStats> teams;
   final int initialIndex;
@@ -52,9 +52,10 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
         return Scaffold(
           backgroundColor: Colors.black,
           appBar: AppBar(backgroundColor: Colors.black),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
+          body: SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Padding(
@@ -149,8 +150,13 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
                 _buildStatsSection('TEAM PERFORMANCE', team.performanceStats),
                 _buildSectionDivider(),
                 _buildStatsSection('ADVANCED ANALYTICS', team.advancedStats),
-              ],
-            ),
+                _buildSectionDivider(),
+                TeamRosterSection(
+                  clubCode: team.clubCode,
+                  teamName: team.teamName,
+                ),
+              ],            ),
+          ),
           ),
         );
       },

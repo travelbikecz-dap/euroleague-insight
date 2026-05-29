@@ -35,11 +35,11 @@ class MatchUpScreen extends StatelessWidget {
         backgroundColor: Colors.black,
       ),
 
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-
-          child: Column(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+            child: Column(
             children: [
 
               Text(
@@ -279,6 +279,7 @@ class MatchUpScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
