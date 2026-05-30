@@ -40,4 +40,5 @@ class CacheDurations {
   static const seasonCode = Duration(hours: 24);
   static const liveData = Duration(minutes: 15);
   static const clubStats = Duration(minutes: 15);
+  static const schedule = Duration(hours: 4);
 }
