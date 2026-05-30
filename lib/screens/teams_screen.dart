@@ -12,18 +12,16 @@ class TeamsScreen extends StatefulWidget {
 }
 
 class _TeamsScreenState extends State<TeamsScreen> {
-  static const _sectionNames = ['Overview', 'Performance', 'Advanced'];
   static const _statCellWidth = 48.0;
-  static const _sectionDividerWidth = 25.0;
   static const _logoSize = 40.0;
   static const _identityWidth = 154.0;
 
+  /// List padding, card padding, drag handle and team identity column.
+  static const _statsAreaHorizontalInset = 250.0;
+
   late Future<List<TeamStats>> teamsFuture;
   List<TeamStats>? teams;
-  List<double> _sectionSnapOffsets = const [0];
-  int _activeSectionIndex = 0;
-  final List<ScrollController> _scrollControllers = [];
-  bool _isSyncingScroll = false;
+  int _statOffset = 0;
 
   @override
   void initState() {
@@ -31,138 +29,28 @@ class _TeamsScreenState extends State<TeamsScreen> {
     teamsFuture = TeamStatsService().getAllTeams();
   }
 
-  @override
-  void dispose() {
-    for (final controller in _scrollControllers) {
-      controller.dispose();
-    }
-    super.dispose();
+  int _visibleStatCount(double statsAreaWidth) {
+    return (statsAreaWidth / _statCellWidth).floor().clamp(1, 999);
   }
 
-  void _ensureScrollControllers(int count) {
-    while (_scrollControllers.length < count) {
-      _scrollControllers.add(ScrollController());
-    }
-    while (_scrollControllers.length > count) {
-      _scrollControllers.removeLast().dispose();
-    }
+  int _maxStatOffset(int totalStats, int visibleCount) {
+    return (totalStats - visibleCount).clamp(0, totalStats);
   }
 
-  void _computeSectionSnapOffsets(TeamStats sample) {
-    final offsets = <double>[0];
-    var x = 0.0;
-
-    for (var i = 0; i < sample.statSections.length; i++) {
-      x += sample.statSections[i].length * _statCellWidth;
-      if (i < sample.statSections.length - 1) {
-        x += _sectionDividerWidth;
-        offsets.add(x);
-      }
-    }
-
-    _sectionSnapOffsets = offsets;
+  int _clampedStatOffset(int totalStats, int visibleCount) {
+    return _statOffset.clamp(0, _maxStatOffset(totalStats, visibleCount));
   }
 
-  int _sectionIndexForOffset(double offset) {
-    var index = 0;
-    for (var i = 0; i < _sectionSnapOffsets.length; i++) {
-      if (offset + (_statCellWidth / 2) >= _sectionSnapOffsets[i]) {
-        index = i;
-      }
-    }
-    return index;
+  void _shiftPage(int direction, int totalStats, int visibleCount) {
+    final maxOffset = _maxStatOffset(totalStats, visibleCount);
+    final step = visibleCount;
+    final next = (_statOffset + direction * step).clamp(0, maxOffset);
+    if (next == _statOffset) return;
+    setState(() => _statOffset = next);
   }
 
-  double _nearestSectionOffset(double offset) {
-    return _sectionSnapOffsets.reduce(
-      (best, candidate) =>
-          (candidate - offset).abs() < (best - offset).abs() ? candidate : best,
-    );
-  }
-
-  void _syncScroll(int sourceIndex, double offset) {
-    if (_isSyncingScroll) return;
-
-    _isSyncingScroll = true;
-    for (var i = 0; i < _scrollControllers.length; i++) {
-      if (i == sourceIndex) continue;
-
-      final controller = _scrollControllers[i];
-      if (!controller.hasClients) continue;
-
-      final target = offset.clamp(0.0, controller.position.maxScrollExtent);
-      if ((controller.offset - target).abs() > 0.5) {
-        controller.jumpTo(target);
-      }
-    }
-    _isSyncingScroll = false;
-
-    final sectionIndex = _sectionIndexForOffset(offset);
-    if (sectionIndex != _activeSectionIndex) {
-      setState(() => _activeSectionIndex = sectionIndex);
-    }
-  }
-
-  void _snapToNearestSection(double offset) {
-    final target = _nearestSectionOffset(offset);
-    final sectionIndex = _sectionIndexForOffset(target);
-
-    _isSyncingScroll = true;
-    final animations = <Future<void>>[];
-    for (final controller in _scrollControllers) {
-      if (!controller.hasClients) continue;
-
-      animations.add(
-        controller.animateTo(
-          target.clamp(0.0, controller.position.maxScrollExtent),
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        ),
-      );
-    }
-
-    if (animations.isEmpty) {
-      _isSyncingScroll = false;
-    } else {
-      Future.wait(animations).whenComplete(() {
-        _isSyncingScroll = false;
-      });
-    }
-
-    if (sectionIndex != _activeSectionIndex) {
-      setState(() => _activeSectionIndex = sectionIndex);
-    }
-  }
-
-  void _jumpToSection(int sectionIndex) {
-    if (sectionIndex < 0 || sectionIndex >= _sectionSnapOffsets.length) {
-      return;
-    }
-
-    final target = _sectionSnapOffsets[sectionIndex];
-    _isSyncingScroll = true;
-    final animations = <Future<void>>[];
-    for (final controller in _scrollControllers) {
-      if (!controller.hasClients) continue;
-
-      animations.add(
-        controller.animateTo(
-          target.clamp(0.0, controller.position.maxScrollExtent),
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOut,
-        ),
-      );
-    }
-
-    if (animations.isEmpty) {
-      _isSyncingScroll = false;
-    } else {
-      Future.wait(animations).whenComplete(() {
-        _isSyncingScroll = false;
-      });
-    }
-
-    setState(() => _activeSectionIndex = sectionIndex);
+  double _statsAreaWidth(BuildContext context) {
+    return MediaQuery.sizeOf(context).width - _statsAreaHorizontalInset;
   }
 
   @override
@@ -184,14 +72,27 @@ class _TeamsScreenState extends State<TeamsScreen> {
         }
 
         teams ??= List<TeamStats>.from(snapshot.data!);
-        _ensureScrollControllers(teams!.length);
-        if (_sectionSnapOffsets.length <= 1 && teams!.isNotEmpty) {
-          _computeSectionSnapOffsets(teams!.first);
-        }
+
+        final statsAreaWidth = _statsAreaWidth(context);
+        final visibleCount = _visibleStatCount(statsAreaWidth);
+        final totalStats = teams!.first.detailStats.length;
+        final start = _clampedStatOffset(totalStats, visibleCount);
+        final end = (start + visibleCount).clamp(0, totalStats);
+        final maxOffset = _maxStatOffset(totalStats, visibleCount);
+        final needsPager = totalStats > visibleCount;
 
         return Column(
           children: [
-            _buildSectionHeader(),
+            _buildStatsHeader(
+              start: start,
+              end: end,
+              total: totalStats,
+              needsPager: needsPager,
+              canGoBack: start > 0,
+              canGoForward: start < maxOffset,
+              onBack: () => _shiftPage(-1, totalStats, visibleCount),
+              onForward: () => _shiftPage(1, totalStats, visibleCount),
+            ),
             Expanded(
               child: ReorderableListView.builder(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -203,9 +104,6 @@ class _TeamsScreenState extends State<TeamsScreen> {
                     }
                     final item = teams!.removeAt(oldIndex);
                     teams!.insert(newIndex, item);
-
-                    final controller = _scrollControllers.removeAt(oldIndex);
-                    _scrollControllers.insert(newIndex, controller);
                   });
                 },
                 itemBuilder: (context, index) {
@@ -263,36 +161,10 @@ class _TeamsScreenState extends State<TeamsScreen> {
                         ),
                         const SizedBox(width: 8),
                         Expanded(
-                          child: NotificationListener<ScrollNotification>(
-                            onNotification: (notification) {
-                              if (_isSyncingScroll) return false;
-
-                              if (notification is ScrollUpdateNotification &&
-                                  notification.depth == 0) {
-                                _syncScroll(
-                                  index,
-                                  notification.metrics.pixels,
-                                );
-                              }
-
-                              if (notification is ScrollEndNotification &&
-                                  notification.depth == 0) {
-                                _snapToNearestSection(
-                                  notification.metrics.pixels,
-                                );
-                              }
-
-                              return false;
-                            },
-                            child: SingleChildScrollView(
-                              controller: _scrollControllers[index],
-                              scrollDirection: Axis.horizontal,
-                              physics: const BouncingScrollPhysics(),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: _buildScrollStats(team),
-                              ),
-                            ),
+                          child: _buildVisibleStats(
+                            team,
+                            start: start,
+                            end: end,
                           ),
                         ),
                       ],
@@ -307,59 +179,92 @@ class _TeamsScreenState extends State<TeamsScreen> {
     );
   }
 
-  Widget _buildSectionHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+  Widget _buildVisibleStats(
+    TeamStats team, {
+    required int start,
+    required int end,
+  }) {
+    final stats = team.detailStats.sublist(start, end);
+
+    return Align(
+      alignment: Alignment.centerLeft,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(_sectionNames.length, (index) {
-          final selected = index == _activeSectionIndex;
-          return Padding(
-            padding: EdgeInsets.only(
-              left: index == 0 ? 0 : 6,
-              right: index == _sectionNames.length - 1 ? 0 : 6,
-            ),
-            child: GestureDetector(
-              onTap: () => _jumpToSection(index),
-              child: AnimatedDefaultTextStyle(
-                duration: const Duration(milliseconds: 200),
-                style: TextStyle(
-                  color: selected ? Colors.orange : Colors.white,
-                  fontSize: 12,
-                  fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-                  letterSpacing: 0.4,
-                ),
-                child: Text(_sectionNames[index]),
-              ),
-            ),
-          );
-        }),
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          for (final stat in stats)
+            _buildStat(stat.label, stat.value),
+        ],
       ),
     );
   }
 
-  List<Widget> _buildScrollStats(TeamStats team) {
-    final widgets = <Widget>[];
-
-    for (var i = 0; i < team.statSections.length; i++) {
-      if (i > 0) {
-        widgets.add(_buildSectionDivider());
-      }
-
-      for (final stat in team.statSections[i]) {
-        widgets.add(_buildStat(stat.label, stat.value));
-      }
-    }
-
-    return widgets;
-  }
-
-  Widget _buildSectionDivider() {
-    return Container(
-      width: 1,
-      height: 34,
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      color: Colors.grey[700],
+  Widget _buildStatsHeader({
+    required int start,
+    required int end,
+    required int total,
+    required bool needsPager,
+    required bool canGoBack,
+    required bool canGoForward,
+    required VoidCallback onBack,
+    required VoidCallback onForward,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
+      child: Row(
+        children: [
+          const Text(
+            'Stats',
+            style: TextStyle(
+              color: Colors.orange,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.4,
+            ),
+          ),
+          const Spacer(),
+          if (needsPager) ...[
+            IconButton(
+              tooltip: 'Previous stats',
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+              onPressed: canGoBack ? onBack : null,
+              icon: Icon(
+                Icons.chevron_left,
+                color: canGoBack ? Colors.white : Colors.white24,
+                size: 28,
+              ),
+            ),
+            Text(
+              '${start + 1}–$end / $total',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.7),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            IconButton(
+              tooltip: 'Next stats',
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+              onPressed: canGoForward ? onForward : null,
+              icon: Icon(
+                Icons.chevron_right,
+                color: canGoForward ? Colors.white : Colors.white24,
+                size: 28,
+              ),
+            ),
+          ] else
+            Text(
+              '$total stats',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.5),
+                fontSize: 12,
+              ),
+            ),
+        ],
+      ),
     );
   }
 
