@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
+
 enum PlayerPhotoStyle {
   /// Roster row — compact portrait card.
   compact,
@@ -45,7 +47,7 @@ class PlayerAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final placeholder = _buildPlaceholder();
+    final placeholder = _buildPlaceholder(context);
 
     return SizedBox(
       width: _width,
@@ -73,19 +75,22 @@ class PlayerAvatar extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
+    final cs = context.cs;
+
     return Container(
       width: _width,
       height: _height,
       decoration: BoxDecoration(
-        color: Colors.grey[850],
+        color: context.elevatedCard,
         borderRadius: BorderRadius.circular(_borderRadius),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
       ),
       alignment: Alignment.center,
       child: Text(
         fallbackText ?? '?',
         style: TextStyle(
-          color: Colors.white,
+          color: cs.onSurfaceVariant,
           fontSize: _width * 0.28,
           fontWeight: FontWeight.bold,
         ),

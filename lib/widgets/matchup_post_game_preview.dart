@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../data/mock_post_game_analysis.dart';
+import '../theme/app_theme.dart';
 
 class MatchupPostGamePreview extends StatelessWidget {
   final MockPostGamePreview preview;
@@ -12,35 +13,37 @@ class MatchupPostGamePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.cs;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _previewBanner(),
+        _previewBanner(cs),
         const SizedBox(height: 12),
-        _sectionTitle('Prediction vs Result'),
+        _sectionTitle(context, 'Prediction vs Result'),
         const SizedBox(height: 10),
-        _comparisonCard(),
+        _comparisonCard(context),
         const SizedBox(height: 20),
-        _sectionTitle('Post Game Analysis'),
+        _sectionTitle(context, 'Post Game Analysis'),
         const SizedBox(height: 10),
-        _analysisCard(),
+        _analysisCard(context),
       ],
     );
   }
 
-  Widget _previewBanner() {
+  Widget _previewBanner(ColorScheme cs) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.12),
+        color: cs.primary.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.35)),
+        border: Border.all(color: cs.primary.withValues(alpha: 0.35)),
       ),
-      child: const Text(
+      child: Text(
         'Preview · mock post-game copy — layout only',
         textAlign: TextAlign.center,
         style: TextStyle(
-          color: Colors.orange,
+          color: cs.primary,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
@@ -48,12 +51,12 @@ class MatchupPostGamePreview extends StatelessWidget {
     );
   }
 
-  Widget _sectionTitle(String title) {
+  Widget _sectionTitle(BuildContext context, String title) {
     return Text(
       title,
       textAlign: TextAlign.center,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: context.cs.onSurface,
         fontSize: 16,
         fontWeight: FontWeight.bold,
         letterSpacing: 0.3,
@@ -61,15 +64,17 @@ class MatchupPostGamePreview extends StatelessWidget {
     );
   }
 
-  Widget _comparisonCard() {
+  Widget _comparisonCard(BuildContext context) {
+    final cs = context.cs;
     final hit = preview.predictionHit;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E),
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,8 +85,8 @@ class MatchupPostGamePreview extends StatelessWidget {
               Expanded(
                 child: Text(
                   preview.title,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: cs.onSurface,
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),
@@ -92,20 +97,22 @@ class MatchupPostGamePreview extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           _comparisonRow(
+            context,
             label: 'Predicted',
             value:
                 '${preview.predictedWinner} · ${preview.predictedHomePct}% – ${preview.predictedAwayPct}%',
           ),
           const SizedBox(height: 10),
           _comparisonRow(
+            context,
             label: 'Final',
             value: preview.resultLine,
           ),
           const SizedBox(height: 14),
           Text(
             preview.comparisonSummary,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: cs.onSurface,
               fontSize: 14,
               height: 1.45,
             ),
@@ -127,7 +134,7 @@ class MatchupPostGamePreview extends StatelessWidget {
       child: Text(
         hit ? 'HIT' : 'MISS',
         style: TextStyle(
-          color: hit ? Colors.greenAccent : Colors.redAccent,
+          color: hit ? Colors.green.shade700 : Colors.red.shade700,
           fontSize: 11,
           fontWeight: FontWeight.bold,
           letterSpacing: 0.8,
@@ -136,7 +143,13 @@ class MatchupPostGamePreview extends StatelessWidget {
     );
   }
 
-  Widget _comparisonRow({required String label, required String value}) {
+  Widget _comparisonRow(
+    BuildContext context, {
+    required String label,
+    required String value,
+  }) {
+    final cs = context.cs;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -144,8 +157,8 @@ class MatchupPostGamePreview extends StatelessWidget {
           width: 72,
           child: Text(
             label,
-            style: const TextStyle(
-              color: Colors.white70,
+            style: TextStyle(
+              color: cs.onSurfaceVariant,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -154,8 +167,8 @@ class MatchupPostGamePreview extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: cs.onSurface,
               fontSize: 14,
               fontWeight: FontWeight.w600,
             ),
@@ -165,19 +178,22 @@ class MatchupPostGamePreview extends StatelessWidget {
     );
   }
 
-  Widget _analysisCard() {
+  Widget _analysisCard(BuildContext context) {
+    final cs = context.cs;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E),
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
       ),
       child: Text(
         preview.analysis,
         textAlign: TextAlign.left,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: cs.onSurface,
           fontSize: 14,
           height: 1.55,
         ),

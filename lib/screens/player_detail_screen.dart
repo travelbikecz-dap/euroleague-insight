@@ -4,6 +4,7 @@ import '../models/player.dart';
 import '../models/player_experience.dart';
 import '../services/player_experience_api_service.dart';
 import '../services/player_stats_api_service.dart';
+import '../theme/app_theme.dart';
 import '../utils/player_bio_formatter.dart';
 import '../widgets/player_avatar.dart';
 
@@ -83,12 +84,11 @@ class _PlayerDetailScreenState extends State<PlayerDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.players.isEmpty) {
-      return const Scaffold(
-        backgroundColor: Colors.black,
+      return Scaffold(
         body: Center(
           child: Text(
             'No players available',
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: context.cs.onSurface),
           ),
         ),
       );
@@ -153,9 +153,10 @@ class _PlayerDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.cs;
+
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(backgroundColor: Colors.black),
+      appBar: AppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
@@ -173,8 +174,8 @@ class _PlayerDetailPage extends StatelessWidget {
                           previousPlayerName != null
                               ? '‹ $previousPlayerName'
                               : '',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: cs.onSurfaceVariant,
                             fontSize: 14,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -184,8 +185,8 @@ class _PlayerDetailPage extends StatelessWidget {
                         child: Text(
                           nextPlayerName != null ? '$nextPlayerName ›' : '',
                           textAlign: TextAlign.right,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: cs.onSurfaceVariant,
                             fontSize: 14,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -204,13 +205,13 @@ class _PlayerDetailPage extends StatelessWidget {
               if (player.dorsal.isNotEmpty)
                 Text(
                   '#${player.dorsal}',
-                  style: const TextStyle(color: Colors.white, fontSize: 14),
+                  style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
                 ),
               Text(
                 player.displayName,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: cs.onSurface,
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
@@ -218,18 +219,18 @@ class _PlayerDetailPage extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 _headerSubtitle(player),
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
               ),
               const SizedBox(height: 24),
-              _buildBioSection(player),
-              _buildSectionDivider(),
+              _buildBioSection(context, player),
+              _buildSectionDivider(context),
               FutureBuilder<PlayerSeasonStats?>(
                 future: statsFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24),
-                      child: CircularProgressIndicator(color: Colors.white),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: CircularProgressIndicator(color: cs.primary),
                     );
                   }
 
@@ -238,7 +239,7 @@ class _PlayerDetailPage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Text(
                         'Could not load season stats',
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: cs.onSurface),
                       ),
                     );
                   }
@@ -249,26 +250,30 @@ class _PlayerDetailPage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Text(
                         'No season stats available',
-                        style: const TextStyle(color: Colors.white),
+                        style: TextStyle(color: cs.onSurfaceVariant),
                       ),
                     );
                   }
 
-                  return _buildStatsSection('SEASON STATS', stats.seasonStats);
+                  return _buildStatsSection(
+                    context,
+                    'SEASON STATS',
+                    stats.seasonStats,
+                  );
                 },
               ),
-              _buildSectionDivider(),
+              _buildSectionDivider(context),
               FutureBuilder<PlayerEuroleagueExperience?>(
                 future: experienceFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
                       child: SizedBox(
                         width: 24,
                         height: 24,
                         child: CircularProgressIndicator(
-                          color: Colors.white,
+                          color: cs.primary,
                           strokeWidth: 2,
                         ),
                       ),
@@ -281,6 +286,7 @@ class _PlayerDetailPage extends StatelessWidget {
 
                   final experience = snapshot.data!;
                   return _buildStatsSection(
+                    context,
                     'EUROLEAGUE EXPERIENCE',
                     [
                       PlayerStatItem(
@@ -310,20 +316,22 @@ class _PlayerDetailPage extends StatelessWidget {
     return parts.join(' · ');
   }
 
-  Widget _buildBioSection(Player player) {
+  Widget _buildBioSection(BuildContext context, Player player) {
     final rows = _bioRows(player);
     if (rows.isEmpty) return const SizedBox.shrink();
+    final cs = context.cs;
 
     return Column(
       children: [
-        _buildSectionTitle('PLAYER BIO'),
+        _buildSectionTitle(context, 'PLAYER BIO'),
         const SizedBox(height: 12),
         Container(
           width: _gridWidth,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           decoration: BoxDecoration(
-            color: Colors.grey[900],
+            color: context.cardColor,
             borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
           ),
           child: Column(
             children: rows
@@ -336,8 +344,8 @@ class _PlayerDetailPage extends StatelessWidget {
                           width: 118,
                           child: Text(
                             row.label,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: cs.onSurfaceVariant,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                             ),
@@ -346,8 +354,8 @@ class _PlayerDetailPage extends StatelessWidget {
                         Expanded(
                           child: Text(
                             row.value,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: cs.onSurface,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -393,11 +401,11 @@ class _PlayerDetailPage extends StatelessWidget {
     return rows;
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String title) {
     return Text(
       title,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: context.cs.onSurfaceVariant,
         fontSize: 12,
         fontWeight: FontWeight.bold,
         letterSpacing: 1.2,
@@ -405,10 +413,14 @@ class _PlayerDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsSection(String title, List<PlayerStatItem> stats) {
+  Widget _buildStatsSection(
+    BuildContext context,
+    String title,
+    List<PlayerStatItem> stats,
+  ) {
     return Column(
       children: [
-        _buildSectionTitle(title),
+        _buildSectionTitle(context, title),
         const SizedBox(height: 12),
         Center(
           child: SizedBox(
@@ -423,7 +435,7 @@ class _PlayerDetailPage extends StatelessWidget {
                     (stat) => SizedBox(
                       width: _statCardWidth,
                       height: _statCardHeight,
-                      child: _buildStatCard(stat.label, stat.value),
+                      child: _buildStatCard(context, stat.label, stat.value),
                     ),
                   )
                   .toList(),
@@ -434,25 +446,28 @@ class _PlayerDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionDivider() {
+  Widget _buildSectionDivider(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Center(
         child: SizedBox(
           width: _gridWidth,
-          child: Divider(color: Colors.grey[800], height: 1),
+          child: Divider(color: Theme.of(context).dividerColor, height: 1),
         ),
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value) {
+  Widget _buildStatCard(BuildContext context, String title, String value) {
+    final cs = context.cs;
+
     return Container(
       width: _statCardWidth,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -462,7 +477,7 @@ class _PlayerDetailPage extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white, fontSize: 10),
+            style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
           ),
           const SizedBox(height: 6),
           Text(
@@ -470,8 +485,8 @@ class _PlayerDetailPage extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: cs.onSurface,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),

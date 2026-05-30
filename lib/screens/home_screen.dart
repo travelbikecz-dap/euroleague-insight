@@ -26,9 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onItemTapped(int index) {
     _pageController.animateToPage(
       index,
-
       duration: const Duration(milliseconds: 300),
-
       curve: Curves.easeInOut,
     );
 
@@ -40,17 +38,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-
       appBar: AppBar(
         title: Text(_titles[_selectedIndex]),
-        backgroundColor: Colors.black,
-        centerTitle: true,
-
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
-
             onPressed: () {
               Navigator.push(
                 context,
@@ -60,37 +52,27 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-
       body: PageView(
         controller: _pageController,
-
         onPageChanged: (index) {
           setState(() {
             _selectedIndex = index;
           });
         },
-
         children: _screens,
       ),
-
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.orange,
-        unselectedItemColor: Colors.grey,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.sports_basketball),
             label: 'Games',
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.leaderboard),
             label: 'Standings',
           ),
-
           BottomNavigationBarItem(icon: Icon(Icons.groups), label: 'Teams'),
         ],
       ),

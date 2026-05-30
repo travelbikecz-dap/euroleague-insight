@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../data/mock_game_mvp.dart';
+import '../theme/app_theme.dart';
 import 'player_avatar.dart';
+import 'team_logo.dart';
 
 class MatchupMvpPreview extends StatelessWidget {
   final MockGameMvp? mvp;
@@ -18,25 +20,32 @@ class MatchupMvpPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.cs;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _sectionTitle('Game MVP'),
+        _sectionTitle(context, 'Game MVP'),
         const SizedBox(height: 10),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF1C1C1E),
+            color: context.cardColor,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
           ),
-          child: isPending ? _pendingContent() : _mvpContent(mvp!),
+          child: isPending
+              ? _pendingContent(context)
+              : _mvpContent(context, mvp!),
         ),
       ],
     );
   }
 
-  Widget _pendingContent() {
+  Widget _pendingContent(BuildContext context) {
+    final cs = context.cs;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -59,13 +68,13 @@ class MatchupMvpPreview extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.08),
+                      color: cs.onSurface.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
+                    child: Text(
                       'PENDING',
                       style: TextStyle(
-                        color: Colors.white54,
+                        color: cs.onSurfaceVariant,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
@@ -73,19 +82,19 @@ class MatchupMvpPreview extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  Text(
                     'Available after final buzzer',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: cs.onSurface,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
+                  Text(
                     'Game still in progress or not started',
                     style: TextStyle(
-                      color: Colors.white54,
+                      color: cs.onSurfaceVariant,
                       fontSize: 13,
                     ),
                   ),
@@ -95,22 +104,21 @@ class MatchupMvpPreview extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        _pendingPrimaryStatsRow(),
+        _pendingPrimaryStatsRow(context),
         const SizedBox(height: 8),
-        _pendingSecondaryStatsRow(),
+        _pendingSecondaryStatsRow(context),
         const SizedBox(height: 12),
-        const Text(
+        Text(
           '—',
-          style: TextStyle(
-            color: Colors.white38,
-            fontSize: 13,
-          ),
+          style: TextStyle(color: context.faint, fontSize: 13),
         ),
       ],
     );
   }
 
-  Widget _mvpContent(MockGameMvp mvp) {
+  Widget _mvpContent(BuildContext context, MockGameMvp mvp) {
+    final cs = context.cs;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -135,13 +143,13 @@ class MatchupMvpPreview extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withValues(alpha: 0.18),
+                      color: cs.primary.withValues(alpha: 0.18),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Text(
+                    child: Text(
                       'TOP PIR',
                       style: TextStyle(
-                        color: Colors.orange,
+                        color: cs.primary,
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,
@@ -151,8 +159,8 @@ class MatchupMvpPreview extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     mvp.displayName,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: cs.onSurface,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -160,13 +168,18 @@ class MatchupMvpPreview extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Image.asset(mvp.teamLogo, width: 18, height: 18),
+                      TeamLogo(
+                        assetPath: mvp.teamLogo,
+                        width: 18,
+                        height: 18,
+                        borderRadius: 4,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           '${mvp.teamName} · #${mvp.dorsal}',
-                          style: const TextStyle(
-                            color: Colors.white70,
+                          style: TextStyle(
+                            color: cs.onSurfaceVariant,
                             fontSize: 13,
                           ),
                         ),
@@ -180,6 +193,7 @@ class MatchupMvpPreview extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _primaryStatsRow(
+          context,
           pir: _formatStat(mvp.pir),
           points: _formatStat(mvp.points),
           rebounds: _formatStat(mvp.rebounds),
@@ -189,6 +203,7 @@ class MatchupMvpPreview extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         _secondaryStatsRow(
+          context,
           steals: _formatStat(mvp.steals),
           blocks: _formatStat(mvp.blocks),
           turnovers: _formatStat(mvp.turnovers),
@@ -197,8 +212,8 @@ class MatchupMvpPreview extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           mvp.shootingLine,
-          style: const TextStyle(
-            color: Colors.white70,
+          style: TextStyle(
+            color: cs.onSurfaceVariant,
             fontSize: 13,
           ),
         ),
@@ -206,12 +221,12 @@ class MatchupMvpPreview extends StatelessWidget {
     );
   }
 
-  Widget _sectionTitle(String title) {
+  Widget _sectionTitle(BuildContext context, String title) {
     return Text(
       title,
       textAlign: TextAlign.center,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: context.cs.onSurface,
         fontSize: 16,
         fontWeight: FontWeight.bold,
         letterSpacing: 0.3,
@@ -219,8 +234,9 @@ class MatchupMvpPreview extends StatelessWidget {
     );
   }
 
-  Widget _pendingPrimaryStatsRow() {
+  Widget _pendingPrimaryStatsRow(BuildContext context) {
     return _primaryStatsRow(
+      context,
       pir: '—',
       points: '—',
       rebounds: '—',
@@ -231,8 +247,9 @@ class MatchupMvpPreview extends StatelessWidget {
     );
   }
 
-  Widget _pendingSecondaryStatsRow() {
+  Widget _pendingSecondaryStatsRow(BuildContext context) {
     return _secondaryStatsRow(
+      context,
       steals: '—',
       blocks: '—',
       turnovers: '—',
@@ -241,7 +258,8 @@ class MatchupMvpPreview extends StatelessWidget {
     );
   }
 
-  Widget _primaryStatsRow({
+  Widget _primaryStatsRow(
+    BuildContext context, {
     required String pir,
     required String points,
     required String rebounds,
@@ -252,16 +270,17 @@ class MatchupMvpPreview extends StatelessWidget {
   }) {
     return Row(
       children: [
-        _statChip('PIR', pir, highlight: highlight, muted: muted),
-        _statChip('PTS', points, muted: muted),
-        _statChip('REB', rebounds, muted: muted),
-        _statChip('AST', assists, muted: muted),
-        _statChip('MIN', minutes, compact: true, muted: muted),
+        _statChip(context, 'PIR', pir, highlight: highlight, muted: muted),
+        _statChip(context, 'PTS', points, muted: muted),
+        _statChip(context, 'REB', rebounds, muted: muted),
+        _statChip(context, 'AST', assists, muted: muted),
+        _statChip(context, 'MIN', minutes, compact: true, muted: muted),
       ],
     );
   }
 
-  Widget _secondaryStatsRow({
+  Widget _secondaryStatsRow(
+    BuildContext context, {
     required String steals,
     required String blocks,
     required String turnovers,
@@ -270,10 +289,10 @@ class MatchupMvpPreview extends StatelessWidget {
   }) {
     return Row(
       children: [
-        _statChip('STL', steals, muted: muted),
-        _statChip('BLK', blocks, muted: muted),
-        _statChip('TOV', turnovers, muted: muted),
-        _statChip('+/-', plusMinus, muted: muted),
+        _statChip(context, 'STL', steals, muted: muted),
+        _statChip(context, 'BLK', blocks, muted: muted),
+        _statChip(context, 'TOV', turnovers, muted: muted),
+        _statChip(context, '+/-', plusMinus, muted: muted),
       ],
     );
   }
@@ -284,18 +303,20 @@ class MatchupMvpPreview extends StatelessWidget {
   }
 
   Widget _statChip(
+    BuildContext context,
     String label,
     String value, {
     bool highlight = false,
     bool compact = false,
     bool muted = false,
   }) {
+    final cs = context.cs;
     final valueColor = muted
-        ? Colors.white38
-        : (highlight ? Colors.orange : Colors.white);
+        ? context.faint
+        : (highlight ? cs.primary : cs.onSurface);
     final labelColor = muted
-        ? Colors.white38
-        : (highlight ? Colors.orange : Colors.white70);
+        ? context.faint
+        : (highlight ? cs.primary : cs.onSurfaceVariant);
 
     return Expanded(
       child: Container(
@@ -305,8 +326,9 @@ class MatchupMvpPreview extends StatelessWidget {
           horizontal: compact ? 4 : 6,
         ),
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2E),
+          color: context.elevatedCard,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
         ),
         child: Column(
           children: [

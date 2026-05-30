@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../models/team_stats.dart';
 import '../services/team_stats_service.dart';
 import '../data/team_names.dart';
+import '../theme/app_theme.dart';
+import '../widgets/team_logo.dart';
 
 class TeamsScreen extends StatefulWidget {
   const TeamsScreen({super.key});
@@ -62,7 +64,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
           return Center(
             child: Text(
               'ERROR: ${snapshot.error}',
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: context.cs.onSurface),
             ),
           );
         }
@@ -84,6 +86,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
         return Column(
           children: [
             _buildStatsHeader(
+              context,
               start: start,
               end: end,
               total: totalStats,
@@ -108,6 +111,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                 },
                 itemBuilder: (context, index) {
                   final team = teams![index];
+                  final cs = context.cs;
 
                   return Container(
                     key: ValueKey(team.clubCode),
@@ -117,7 +121,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey[900],
+                      color: cs.surfaceContainerHigh,
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
@@ -125,11 +129,11 @@ class _TeamsScreenState extends State<TeamsScreen> {
                       children: [
                         ReorderableDragStartListener(
                           index: index,
-                          child: const Padding(
-                            padding: EdgeInsets.only(right: 8),
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8),
                             child: Icon(
                               Icons.drag_handle,
-                              color: Colors.white54,
+                              color: context.subtle,
                               size: 24,
                             ),
                           ),
@@ -138,8 +142,8 @@ class _TeamsScreenState extends State<TeamsScreen> {
                           width: _identityWidth,
                           child: Row(
                             children: [
-                              Image.asset(
-                                team.logo,
+                              TeamLogo(
+                                assetPath: team.logo,
                                 width: _logoSize,
                                 height: _logoSize,
                               ),
@@ -149,8 +153,8 @@ class _TeamsScreenState extends State<TeamsScreen> {
                                   TeamNames.listName(team.apiTeamName),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: cs.onSurface,
                                     fontSize: 13,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -162,6 +166,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: _buildVisibleStats(
+                            context,
                             team,
                             start: start,
                             end: end,
@@ -180,6 +185,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
   }
 
   Widget _buildVisibleStats(
+    BuildContext context,
     TeamStats team, {
     required int start,
     required int end,
@@ -192,13 +198,14 @@ class _TeamsScreenState extends State<TeamsScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           for (final stat in stats)
-            _buildStat(stat.label, stat.value),
+            _buildStat(context, stat.label, stat.value),
         ],
       ),
     );
   }
 
-  Widget _buildStatsHeader({
+  Widget _buildStatsHeader(
+    BuildContext context, {
     required int start,
     required int end,
     required int total,
@@ -208,14 +215,16 @@ class _TeamsScreenState extends State<TeamsScreen> {
     required VoidCallback onBack,
     required VoidCallback onForward,
   }) {
+    final cs = context.cs;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 12, 8),
       child: Row(
         children: [
-          const Text(
+          Text(
             'Stats',
             style: TextStyle(
-              color: Colors.orange,
+              color: cs.primary,
               fontSize: 14,
               fontWeight: FontWeight.bold,
               letterSpacing: 0.4,
@@ -231,14 +240,14 @@ class _TeamsScreenState extends State<TeamsScreen> {
               onPressed: canGoBack ? onBack : null,
               icon: Icon(
                 Icons.chevron_left,
-                color: canGoBack ? Colors.white : Colors.white24,
+                color: canGoBack ? cs.onSurface : context.faint,
                 size: 28,
               ),
             ),
             Text(
               '${start + 1}–$end / $total',
               style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.7),
+                color: context.muted,
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
               ),
@@ -251,24 +260,23 @@ class _TeamsScreenState extends State<TeamsScreen> {
               onPressed: canGoForward ? onForward : null,
               icon: Icon(
                 Icons.chevron_right,
-                color: canGoForward ? Colors.white : Colors.white24,
+                color: canGoForward ? cs.onSurface : context.faint,
                 size: 28,
               ),
             ),
           ] else
             Text(
               '$total stats',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.5),
-                fontSize: 12,
-              ),
+              style: TextStyle(color: context.subtle, fontSize: 12),
             ),
         ],
       ),
     );
   }
 
-  Widget _buildStat(String label, String value) {
+  Widget _buildStat(BuildContext context, String label, String value) {
+    final onSurface = context.cs.onSurface;
+
     return SizedBox(
       width: _statCellWidth,
       child: Column(
@@ -279,8 +287,8 @@ class _TeamsScreenState extends State<TeamsScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: onSurface,
               fontSize: 10,
               fontWeight: FontWeight.w500,
             ),
@@ -291,8 +299,8 @@ class _TeamsScreenState extends State<TeamsScreen> {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: onSurface,
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),

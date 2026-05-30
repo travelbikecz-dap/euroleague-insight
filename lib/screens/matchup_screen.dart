@@ -17,6 +17,8 @@ import '../services/team_stats_api_service.dart';
 import '../utils/game_time_formatter.dart';
 import '../data/mock_game_mvp.dart';
 import '../data/mock_post_game_analysis.dart';
+import '../theme/app_theme.dart';
+import '../widgets/team_logo.dart';
 import '../widgets/matchup_mvp_preview.dart';
 import '../widgets/matchup_post_game_preview.dart';
 
@@ -168,7 +170,7 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     if (_game.status == GameDisplayStatus.live) {
       return Colors.redAccent;
     }
-    return Colors.orange;
+    return AppTheme.brandOrange;
   }
 
   bool get _showPostGameSections {
@@ -201,26 +203,28 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     );
   }
 
-  Widget _mvpJumpChip() {
+  Widget _mvpJumpChip(BuildContext context) {
+    final cs = context.cs;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Center(
         child: ActionChip(
-          avatar: const Icon(Icons.emoji_events_outlined, size: 18, color: Colors.orange),
+          avatar: Icon(Icons.emoji_events_outlined, size: 18, color: cs.primary),
           label: const Text('MVP'),
-          labelStyle: const TextStyle(
-            color: Colors.white,
+          labelStyle: TextStyle(
+            color: cs.onSurface,
             fontWeight: FontWeight.w600,
           ),
-          backgroundColor: const Color(0xFF2C2C2E),
-          side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+          backgroundColor: context.elevatedCard,
+          side: BorderSide(color: cs.outline.withValues(alpha: 0.4)),
           onPressed: _scrollToMvp,
         ),
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(BuildContext context) {
     final homeStats = _homeStats!;
     final awayStats = _awayStats!;
     final prediction = _prediction!;
@@ -245,19 +249,22 @@ class _MatchUpScreenState extends State<MatchUpScreen>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _teamHeader(
+                  context,
                   logo: _game.homeLogo,
                   name: _game.homeDisplayName,
                 ),
-                _scoreHeader(),
+                _scoreHeader(context),
                 _teamHeader(
+                  context,
                   logo: _game.awayLogo,
                   name: _game.awayDisplayName,
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            if (_showMvpSection) _mvpJumpChip(),
+            if (_showMvpSection) _mvpJumpChip(context),
             _pregameSections(
+              context,
               homeStats: homeStats,
               awayStats: awayStats,
               prediction: prediction,
@@ -281,7 +288,8 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     );
   }
 
-  Widget _pregameSections({
+  Widget _pregameSections(
+    BuildContext context, {
     required TeamStats homeStats,
     required TeamStats awayStats,
     required MatchupPrediction prediction,
@@ -289,17 +297,20 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _sectionTitle('Prediction'),
+        _sectionTitle(context, 'Prediction'),
         const SizedBox(height: 10),
-        _predictionCard(prediction),
+        _predictionCard(context, prediction),
         const SizedBox(height: 20),
-        _sectionTitle('Team Comparison'),
+        _sectionTitle(context, 'Team Comparison'),
         const SizedBox(height: 10),
-        _surfaceCard(child: _buildStatScroll(homeStats, awayStats)),
+        _surfaceCard(
+          context,
+          child: _buildStatScroll(context, homeStats, awayStats),
+        ),
         const SizedBox(height: 20),
-        _sectionTitle('Pre-Game Insight'),
+        _sectionTitle(context, 'Pre-Game Insight'),
         const SizedBox(height: 10),
-        _insightCard(prediction.insight),
+        _insightCard(context, prediction.insight),
       ],
     );
   }
@@ -307,35 +318,38 @@ class _MatchUpScreenState extends State<MatchUpScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
         title: Text(_game.roundLabel),
-        backgroundColor: Colors.black,
       ),
       body: SafeArea(
         child: _loading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
             ? _ErrorState(message: _error!, onRetry: _loadMatchupData)
-            : _buildContent(),
+            : _buildContent(context),
       ),
     );
   }
 
-  Widget _teamHeader({required String logo, required String name}) {
+  Widget _teamHeader(
+    BuildContext context, {
+    required String logo,
+    required String name,
+  }) {
     return Expanded(
       child: Column(
         children: [
-          Image.asset(logo, width: 70),
+          TeamLogo(assetPath: logo, width: 70, height: 70),
           const SizedBox(height: 10),
           Text(
             name,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: context.cs.onSurface,
               fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -343,7 +357,9 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     );
   }
 
-  Widget _scoreHeader() {
+  Widget _scoreHeader(BuildContext context) {
+    final cs = context.cs;
+
     if (_game.hasScoreboard &&
         (_game.status == GameDisplayStatus.live ||
             _game.status == GameDisplayStatus.final_ ||
@@ -352,8 +368,8 @@ class _MatchUpScreenState extends State<MatchUpScreen>
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Text(
           '${_game.homeScore} - ${_game.awayScore}',
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: cs.onSurface,
             fontSize: 32,
             fontWeight: FontWeight.bold,
           ),
@@ -361,12 +377,12 @@ class _MatchUpScreenState extends State<MatchUpScreen>
       );
     }
 
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 8),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Text(
         'vs',
         style: TextStyle(
-          color: Colors.white54,
+          color: cs.onSurfaceVariant,
           fontSize: 28,
           fontWeight: FontWeight.bold,
         ),
@@ -374,12 +390,12 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     );
   }
 
-  Widget _sectionTitle(String title) {
+  Widget _sectionTitle(BuildContext context, String title) {
     return Text(
       title,
       textAlign: TextAlign.center,
-      style: const TextStyle(
-        color: Colors.white,
+      style: TextStyle(
+        color: context.cs.onSurface,
         fontSize: 16,
         fontWeight: FontWeight.bold,
         letterSpacing: 0.3,
@@ -387,26 +403,33 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     );
   }
 
-  Widget _surfaceCard({required Widget child}) {
+  Widget _surfaceCard(BuildContext context, {required Widget child}) {
+    final cs = context.cs;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1C1C1E),
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
       ),
       child: child,
     );
   }
 
-  Widget _predictionCard(MatchupPrediction prediction) {
+  Widget _predictionCard(BuildContext context, MatchupPrediction prediction) {
+    final cs = context.cs;
+
     return _surfaceCard(
+      context,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
             child: _probabilityColumn(
+              context,
               label: _game.homeDisplayName,
               value: prediction.homeWinProbability.round(),
             ),
@@ -414,10 +437,11 @@ class _MatchUpScreenState extends State<MatchUpScreen>
           Container(
             width: 1,
             height: 70,
-            color: Colors.white12,
+            color: cs.outline.withValues(alpha: 0.5),
           ),
           Expanded(
             child: _probabilityColumn(
+              context,
               label: _game.awayDisplayName,
               value: prediction.awayWinProbability.round(),
             ),
@@ -427,13 +451,14 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     );
   }
 
-  Widget _insightCard(String insight) {
+  Widget _insightCard(BuildContext context, String insight) {
     return _surfaceCard(
+      context,
       child: Text(
         insight,
         textAlign: TextAlign.left,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: context.cs.onSurface,
           fontSize: 14,
           height: 1.55,
         ),
@@ -441,7 +466,13 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     );
   }
 
-  Widget _probabilityColumn({required String label, required int value}) {
+  Widget _probabilityColumn(
+    BuildContext context, {
+    required String label,
+    required int value,
+  }) {
+    final cs = context.cs;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -450,8 +481,8 @@ class _MatchUpScreenState extends State<MatchUpScreen>
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: cs.onSurface,
             fontSize: 14,
             fontWeight: FontWeight.bold,
           ),
@@ -460,8 +491,8 @@ class _MatchUpScreenState extends State<MatchUpScreen>
         Text(
           '$value%',
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: Colors.orange,
+          style: TextStyle(
+            color: cs.primary,
             fontSize: 48,
             fontWeight: FontWeight.bold,
           ),
@@ -470,21 +501,26 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     );
   }
 
-  Widget _buildStatScroll(TeamStats home, TeamStats away) {
+  Widget _buildStatScroll(
+    BuildContext context,
+    TeamStats home,
+    TeamStats away,
+  ) {
     final stats = MatchupStatsBuilder.buildFlat(home: home, away: away);
 
     return SizedBox(
       height: 96,
       child: ListView(
         scrollDirection: Axis.horizontal,
-        children: stats.map(_buildStatCard).toList(),
+        children: stats.map((s) => _buildStatCard(context, s)).toList(),
       ),
     );
   }
 
-  Widget _buildStatCard(MatchupStatComparison stat) {
-    var homeColor = Colors.white;
-    var awayColor = Colors.white;
+  Widget _buildStatCard(BuildContext context, MatchupStatComparison stat) {
+    final cs = context.cs;
+    var homeColor = cs.onSurface;
+    var awayColor = cs.onSurface;
 
     if (stat.homeValue != stat.awayValue) {
       if (!stat.lowerIsBetter) {
@@ -516,8 +552,9 @@ class _MatchUpScreenState extends State<MatchUpScreen>
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: context.elevatedCard,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -527,8 +564,8 @@ class _MatchUpScreenState extends State<MatchUpScreen>
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: cs.onSurface,
               fontSize: 11,
               fontWeight: FontWeight.bold,
             ),
@@ -546,10 +583,10 @@ class _MatchUpScreenState extends State<MatchUpScreen>
                   style: valueStyle.copyWith(color: homeColor),
                 ),
               ),
-              const Text(
+              Text(
                 '-',
                 style: TextStyle(
-                  color: Colors.white54,
+                  color: cs.onSurfaceVariant,
                   fontSize: 14,
                 ),
               ),
@@ -599,14 +636,11 @@ class _ErrorState extends StatelessWidget {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: onRetry,
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.orange,
-              ),
               child: const Text('Retry'),
             ),
           ],

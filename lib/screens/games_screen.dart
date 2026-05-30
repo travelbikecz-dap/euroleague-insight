@@ -195,28 +195,30 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
     final rounds = _rounds;
     if (rounds == null || rounds.isEmpty) return;
 
+    final cs = Theme.of(context).colorScheme;
     final selected = await showModalBottomSheet<int>(
       context: context,
-      backgroundColor: Colors.grey[900],
+      backgroundColor: cs.surfaceContainerHigh,
       builder: (context) {
         return ListView.builder(
           itemCount: rounds.length,
           itemBuilder: (context, index) {
             final round = rounds[index];
             final isSelected = index == _currentPage;
+            final sheetCs = Theme.of(context).colorScheme;
 
             return ListTile(
               selected: isSelected,
               title: Text(
                 round.compactHeaderLabel,
                 style: TextStyle(
-                  color: isSelected ? Colors.orange : Colors.white,
+                  color: isSelected ? sheetCs.primary : sheetCs.onSurface,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
               subtitle: Text(
                 '${round.games.length} games',
-                style: const TextStyle(color: Colors.white70),
+                style: TextStyle(color: sheetCs.onSurface.withValues(alpha: 0.7)),
               ),
               onTap: () => Navigator.pop(context, index),
             );
@@ -244,17 +246,17 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
       return Center(
         child: Text(
           'ERROR: $_error',
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
       );
     }
 
     final rounds = _rounds;
     if (rounds == null || rounds.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No regular season games available',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
         ),
       );
     }
@@ -282,8 +284,8 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
         Expanded(
           child: RefreshIndicator(
             onRefresh: () => _loadRounds(forceRefresh: true),
-            color: Colors.orange,
-            backgroundColor: Colors.grey[900],
+            color: Theme.of(context).colorScheme.primary,
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHigh,
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (page) {
@@ -340,6 +342,7 @@ class _RoundHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final useCompactHeader = screenWidth < 400;
     final titleText = useCompactHeader
@@ -352,7 +355,7 @@ class _RoundHeader extends StatelessWidget {
         children: [
           IconButton(
             onPressed: canGoBack ? onPrevious : null,
-            icon: const Icon(Icons.chevron_left, color: Colors.white),
+            icon: Icon(Icons.chevron_left, color: cs.onSurface),
           ),
           Expanded(
             child: InkWell(
@@ -367,8 +370,8 @@ class _RoundHeader extends StatelessWidget {
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: cs.onSurface,
                         fontSize: 17,
                         fontWeight: FontWeight.bold,
                       ),
@@ -376,7 +379,10 @@ class _RoundHeader extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '${round.games.length} games · tap to jump',
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      style: TextStyle(
+                        color: cs.onSurface.withValues(alpha: 0.7),
+                        fontSize: 12,
+                      ),
                     ),
                   ],
                 ),
@@ -385,7 +391,7 @@ class _RoundHeader extends StatelessWidget {
           ),
           IconButton(
             onPressed: canGoForward ? onNext : null,
-            icon: const Icon(Icons.chevron_right, color: Colors.white),
+            icon: Icon(Icons.chevron_right, color: cs.onSurface),
           ),
         ],
       ),

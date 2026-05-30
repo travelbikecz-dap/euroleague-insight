@@ -8,7 +8,9 @@ import '../models/game_display_status.dart';
 import '../services/game_status_resolver.dart';
 import '../services/live_game_api_service.dart';
 import '../services/live_game_merger.dart';
+import '../theme/app_theme.dart';
 import '../utils/game_time_formatter.dart';
+import '../widgets/team_logo.dart';
 
 class GameDetailScreen extends StatefulWidget {
   final EuroleagueGame game;
@@ -101,15 +103,15 @@ class _GameDetailScreenState extends State<GameDetailScreen>
     if (_game.status == GameDisplayStatus.live) {
       return Colors.redAccent;
     }
-    return Colors.orange;
+    return AppTheme.brandOrange;
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.cs;
+
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
         title: Text(_game.roundLabel),
       ),
       body: SafeArea(
@@ -131,10 +133,11 @@ class _GameDetailScreenState extends State<GameDetailScreen>
               Text(
                 GameTimeFormatter.formatFull(_game.utcDate),
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white, fontSize: 14),
+                style: TextStyle(color: cs.onSurfaceVariant, fontSize: 14),
               ),
               const SizedBox(height: 32),
               _teamBlock(
+                context,
                 logo: _game.homeLogo,
                 name: _game.homeDisplayName,
                 score: _game.homeScore,
@@ -142,6 +145,7 @@ class _GameDetailScreenState extends State<GameDetailScreen>
               ),
               const SizedBox(height: 20),
               _teamBlock(
+                context,
                 logo: _game.awayLogo,
                 name: _game.awayDisplayName,
                 score: _game.awayScore,
@@ -151,13 +155,14 @@ class _GameDetailScreenState extends State<GameDetailScreen>
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[900],
+                  color: context.cardColor,
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
                 ),
-                child: const Text(
+                child: Text(
                   'MatchUp and predictions coming in a future update.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.white, fontSize: 14),
+                  style: TextStyle(color: cs.onSurface, fontSize: 14),
                 ),
               ),
             ],
@@ -167,15 +172,18 @@ class _GameDetailScreenState extends State<GameDetailScreen>
     );
   }
 
-  Widget _teamBlock({
+  Widget _teamBlock(
+    BuildContext context, {
     required String logo,
     required String name,
     required int? score,
     required bool isHome,
   }) {
+    final cs = context.cs;
+
     return Row(
       children: [
-        Image.asset(logo, width: 56, height: 56),
+        TeamLogo(assetPath: logo, width: 56, height: 56, borderRadius: 12),
         const SizedBox(width: 16),
         Expanded(
           child: Column(
@@ -183,13 +191,13 @@ class _GameDetailScreenState extends State<GameDetailScreen>
             children: [
               Text(
                 isHome ? 'Home' : 'Away',
-                style: const TextStyle(color: Colors.white70, fontSize: 12),
+                style: TextStyle(color: cs.onSurfaceVariant, fontSize: 12),
               ),
               const SizedBox(height: 4),
               Text(
                 name,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: cs.onSurface,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -200,8 +208,8 @@ class _GameDetailScreenState extends State<GameDetailScreen>
         if (score != null)
           Text(
             '$score',
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: cs.onSurface,
               fontSize: 36,
               fontWeight: FontWeight.bold,
             ),

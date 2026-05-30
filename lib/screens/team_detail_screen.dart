@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../models/team_stats.dart';
+import '../theme/app_theme.dart';
+import '../widgets/team_logo.dart';
 import '../widgets/team_roster_section.dart';
 
 /// Scroll offset after which the hero name is off-screen (~logo + title block).
@@ -148,24 +150,25 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
     }
   }
 
-  Widget _buildCompactAppBarTitle(TeamStats team) {
+  Widget _buildCompactAppBarTitle(BuildContext context, TeamStats team) {
+    final cs = context.cs;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset(
-          team.logo,
+        TeamLogo(
+          assetPath: team.logo,
           width: 28,
           height: 28,
-          fit: BoxFit.contain,
         ),
         const SizedBox(width: 10),
         Text(
           team.teamName,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: cs.onSurface,
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -175,7 +178,7 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
           Text(
             '${team.position}.',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.55),
+              color: cs.onSurfaceVariant,
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -201,11 +204,10 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
   @override
   Widget build(BuildContext context) {
     final team = widget.team;
+    final cs = context.cs;
 
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black,
         title: null,
         automaticallyImplyLeading: true,
         flexibleSpace: _showCompactTitle
@@ -216,7 +218,7 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
                     const SizedBox(width: 56),
                     Expanded(
                       child: Center(
-                        child: _buildCompactAppBarTitle(team),
+                        child: _buildCompactAppBarTitle(context, team),
                       ),
                     ),
                     const SizedBox(width: 56),
@@ -242,8 +244,8 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
                         widget.previousTeamName != null
                             ? '‹ ${widget.previousTeamName}'
                             : '',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
                           fontSize: 16,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -255,8 +257,8 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
                             ? '${widget.nextTeamName} ›'
                             : '',
                         textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: cs.onSurfaceVariant,
                           fontSize: 16,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -271,15 +273,20 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
                 child: Stack(
                   children: [
                     Center(
-                      child: Image.asset(team.logo, width: 120, height: 120),
+                      child: TeamLogo(
+                        assetPath: team.logo,
+                        width: 120,
+                        height: 120,
+                        borderRadius: 16,
+                      ),
                     ),
                     Positioned(
                       left: 20,
                       top: 35,
                       child: Text(
                         '${team.position}.',
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: cs.onSurface,
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
                         ),
@@ -291,19 +298,19 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
               Text(
                 team.teamName,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: cs.onSurface,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
-              _buildRosterCta(),
+              _buildRosterCta(context),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'LAST 5',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: cs.onSurface,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                 ),
@@ -324,14 +331,14 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
                 }).toList(),
               ),
               const SizedBox(height: 30),
-              _buildStatsSection('TEAM OVERVIEW', team.overviewStats),
-              _buildSectionDivider(),
-              _buildStatsSection('TEAM PERFORMANCE', team.performanceStats),
-              _buildSectionDivider(),
-              _buildStatsSection('ADVANCED ANALYTICS', team.advancedStats),
+              _buildStatsSection(context, 'TEAM OVERVIEW', team.overviewStats),
+              _buildSectionDivider(context),
+              _buildStatsSection(context, 'TEAM PERFORMANCE', team.performanceStats),
+              _buildSectionDivider(context),
+              _buildStatsSection(context, 'ADVANCED ANALYTICS', team.advancedStats),
               KeyedSubtree(
                 key: _rosterKey,
-                child: _buildSectionDivider(),
+                child: _buildSectionDivider(context),
               ),
               TeamRosterSection(
                 clubCode: team.clubCode,
@@ -344,7 +351,9 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
     );
   }
 
-  Widget _buildRosterCta() {
+  Widget _buildRosterCta(BuildContext context) {
+    final cs = context.cs;
+
     return Center(
       child: Material(
         color: Colors.transparent,
@@ -354,19 +363,19 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.grey[900],
+              color: context.cardColor,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey[700]!),
+              border: Border.all(color: cs.outline.withValues(alpha: 0.4)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.groups_outlined, color: Colors.grey[300], size: 20),
+                Icon(Icons.groups_outlined, color: cs.primary, size: 20),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   'View Team Roster',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: cs.onSurface,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -379,13 +388,19 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
     );
   }
 
-  Widget _buildStatsSection(String title, List<TeamStatItem> stats) {
+  Widget _buildStatsSection(
+    BuildContext context,
+    String title,
+    List<TeamStatItem> stats,
+  ) {
+    final cs = context.cs;
+
     return Column(
       children: [
         Text(
           title,
           style: TextStyle(
-            color: Colors.grey[400],
+            color: cs.onSurfaceVariant,
             fontSize: 12,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
@@ -405,7 +420,7 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
                     (stat) => SizedBox(
                       width: _statCardWidth,
                       height: _statCardHeight,
-                      child: _buildStatCard(stat.label, stat.value),
+                      child: _buildStatCard(context, stat.label, stat.value),
                     ),
                   )
                   .toList(),
@@ -416,25 +431,28 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
     );
   }
 
-  Widget _buildSectionDivider() {
+  Widget _buildSectionDivider(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: Center(
         child: SizedBox(
           width: _gridWidth,
-          child: Divider(color: Colors.grey[800], height: 1),
+          child: Divider(color: Theme.of(context).dividerColor, height: 1),
         ),
       ),
     );
   }
 
-  Widget _buildStatCard(String title, String value) {
+  Widget _buildStatCard(BuildContext context, String title, String value) {
+    final cs = context.cs;
+
     return Container(
       width: _statCardWidth,
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.grey[900],
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -444,7 +462,7 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white, fontSize: 10),
+            style: TextStyle(color: cs.onSurfaceVariant, fontSize: 10),
           ),
           const SizedBox(height: 6),
           Text(
@@ -452,8 +470,8 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: cs.onSurface,
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),

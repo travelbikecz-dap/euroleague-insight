@@ -5,10 +5,11 @@ import '../models/standing.dart';
 import '../models/team_stats.dart';
 import '../data/team_names.dart';
 import '../services/standings_api_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/team_logo.dart';
 
 enum _StandingZone { playoffs, playIn, out }
 
-const _cardColor = Color(0xFF1C1C1E);
 const _playoffsColor = Color(0xFF34C759);
 const _playInColor = Color(0xFFFFD60A);
 
@@ -57,7 +58,7 @@ class _StandingsScreenState extends State<StandingsScreen> {
           return Center(
             child: Text(
               'ERROR: ${snapshot.error}',
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
           );
         }
@@ -137,7 +138,7 @@ class _StandingsLegend extends StatelessWidget {
         spacing: 16,
         runSpacing: 8,
         alignment: WrapAlignment.center,
-        children: const [
+        children: [
           _LegendItem(color: _playoffsColor, label: 'Playoffs (1–6)'),
           _LegendItem(color: _playInColor, label: 'Play-in (7–10)'),
         ],
@@ -171,8 +172,8 @@ class _LegendItem extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white70,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
             fontSize: 12,
             fontWeight: FontWeight.w500,
           ),
@@ -194,14 +195,14 @@ class _ZoneDivider extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Divider(color: Colors.white.withValues(alpha: 0.12)),
+            child: Divider(color: Theme.of(context).dividerColor),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
               label.toUpperCase(),
-              style: const TextStyle(
-                color: Colors.white54,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.8,
@@ -209,7 +210,7 @@ class _ZoneDivider extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: Divider(color: Colors.white.withValues(alpha: 0.12)),
+            child: Divider(color: Theme.of(context).dividerColor),
           ),
         ],
       ),
@@ -239,7 +240,7 @@ class _StandingRowCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Material(
-        color: _cardColor,
+        color: context.cardColor,
         borderRadius: BorderRadius.circular(12),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
@@ -257,55 +258,34 @@ class _StandingRowCard extends StatelessWidget {
                       children: [
                         Text(
                           '$position.',
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                           ),
                         ),
                         const SizedBox(width: 10),
-                        if (compactCrvenaLogo)
-                          SizedBox(
-                            width: logoSize,
-                            height: logoSize,
-                            child: Image.asset(
-                              standing.team.logo,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  Icons.sports_basketball,
-                                  color: Colors.orange,
-                                  size: logoSize * 0.75,
-                                );
-                              },
-                            ),
-                          )
-                        else
-                          Image.asset(
-                            standing.team.logo,
-                            width: logoSize,
-                            height: logoSize,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.sports_basketball,
-                                color: Colors.orange,
-                              );
-                            },
-                          ),
+                        TeamLogo(
+                          assetPath: standing.team.logo,
+                          width: logoSize,
+                          height: logoSize,
+                        ),
                       ],
                     ),
                     title: Text(
                       TeamNames.shortName(standing.team.name),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontSize: 14,
                       ),
                     ),
                     subtitle: Text(
                       'W: ${standing.wins} | L: ${standing.losses}',
-                      style: const TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
                     ),
                     trailing: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -313,11 +293,13 @@ class _StandingRowCard extends StatelessWidget {
                       children: [
                         Text(
                           'PF: ${standing.pointsFor}',
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                         ),
                         Text(
                           'PA: ${standing.pointsAgainst}',
-                          style: const TextStyle(color: Colors.white70),
+                          style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
                         ),
                         const SizedBox(height: 4),
                         Row(

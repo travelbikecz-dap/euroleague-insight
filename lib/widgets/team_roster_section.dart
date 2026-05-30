@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/player.dart';
 import '../screens/player_detail_screen.dart';
 import '../services/roster_api_service.dart';
+import '../theme/app_theme.dart';
 import 'player_avatar.dart';
 
 class TeamRosterSection extends StatefulWidget {
@@ -39,12 +40,14 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.cs;
+
     return Column(
       children: [
         Text(
           'ROSTER',
           style: TextStyle(
-            color: Colors.grey[400],
+            color: cs.onSurfaceVariant,
             fontSize: 12,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.2,
@@ -55,9 +58,9 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
           future: _rosterFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: CircularProgressIndicator(color: Colors.white),
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: CircularProgressIndicator(color: cs.primary),
               );
             }
 
@@ -66,7 +69,7 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Text(
                   'Could not load roster',
-                  style: TextStyle(color: Colors.grey[500]),
+                  style: TextStyle(color: cs.onSurfaceVariant),
                 ),
               );
             }
@@ -77,7 +80,7 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 child: Text(
                   'No players found',
-                  style: TextStyle(color: Colors.grey[500]),
+                  style: TextStyle(color: cs.onSurfaceVariant),
                 ),
               );
             }
@@ -121,8 +124,11 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.grey[900],
+          color: context.cardColor,
           borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: context.cs.outline.withValues(alpha: 0.3),
+          ),
         ),
         child: Row(
           children: [
@@ -136,14 +142,17 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
               width: 28,
               child: Text(
                 player.dorsal.isNotEmpty ? '#${player.dorsal}' : '',
-                style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                style: TextStyle(
+                  color: context.cs.onSurfaceVariant,
+                  fontSize: 13,
+                ),
               ),
             ),
             Expanded(
               child: Text(
                 player.displayName,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: context.cs.onSurface,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -153,10 +162,17 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
             if (player.position.isNotEmpty)
               Text(
                 player.position,
-                style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                style: TextStyle(
+                  color: context.cs.onSurfaceVariant,
+                  fontSize: 13,
+                ),
               ),
             const SizedBox(width: 4),
-            Icon(Icons.chevron_right, color: Colors.grey[700], size: 20),
+            Icon(
+              Icons.chevron_right,
+              color: context.cs.outline,
+              size: 20,
+            ),
           ],
         ),
       ),
