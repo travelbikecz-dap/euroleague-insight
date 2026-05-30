@@ -208,7 +208,7 @@ class _GamesScreenState extends State<GamesScreen> with WidgetsBindingObserver {
             return ListTile(
               selected: isSelected,
               title: Text(
-                'Round ${round.roundNumber} · ${round.dateLabel}',
+                round.compactHeaderLabel,
                 style: TextStyle(
                   color: isSelected ? Colors.orange : Colors.white,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -340,6 +340,12 @@ class _RoundHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final useCompactHeader = screenWidth < 400;
+    final titleText = useCompactHeader
+        ? round.compactHeaderLabel
+        : 'Round ${round.roundNumber} · ${round.dateLabel}';
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 8, 8, 4),
       child: Row(
@@ -357,8 +363,10 @@ class _RoundHeader extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      'Round ${round.roundNumber} · ${round.dateLabel}',
+                      titleText,
                       textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 17,

@@ -26,6 +26,10 @@ Color? _zoneStripeColor(_StandingZone zone) {
   };
 }
 
+bool _isCrvenaLogo(Standing standing) {
+  return standing.team.logo == 'assets/logos/crvena.png';
+}
+
 class StandingsScreen extends StatefulWidget {
   const StandingsScreen({super.key});
 
@@ -229,6 +233,8 @@ class _StandingRowCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stripeColor = _zoneStripeColor(zone);
+    final compactCrvenaLogo = _isCrvenaLogo(standing);
+    final logoSize = compactCrvenaLogo ? 32.0 : 40.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -258,22 +264,44 @@ class _StandingRowCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 10),
-                        Image.asset(
-                          standing.team.logo,
-                          width: 40,
-                          height: 40,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(
-                              Icons.sports_basketball,
-                              color: Colors.orange,
-                            );
-                          },
-                        ),
+                        if (compactCrvenaLogo)
+                          SizedBox(
+                            width: logoSize,
+                            height: logoSize,
+                            child: Image.asset(
+                              standing.team.logo,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.sports_basketball,
+                                  color: Colors.orange,
+                                  size: logoSize * 0.75,
+                                );
+                              },
+                            ),
+                          )
+                        else
+                          Image.asset(
+                            standing.team.logo,
+                            width: logoSize,
+                            height: logoSize,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.sports_basketball,
+                                color: Colors.orange,
+                              );
+                            },
+                          ),
                       ],
                     ),
                     title: Text(
                       TeamNames.shortName(standing.team.name),
-                      style: const TextStyle(color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                      ),
                     ),
                     subtitle: Text(
                       'W: ${standing.wins} | L: ${standing.losses}',

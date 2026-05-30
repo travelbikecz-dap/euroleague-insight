@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import '../models/team_stats.dart';
 import '../widgets/team_roster_section.dart';
 
+/// Scroll offset after which the hero name is off-screen (~logo + title block).
+const _kCompactHeaderScrollThreshold = 200.0;
+
 class TeamDetailScreen extends StatefulWidget {
   final List<TeamStats> teams;
   final int initialIndex;
@@ -19,6 +22,8 @@ class TeamDetailScreen extends StatefulWidget {
 
 class _TeamDetailScreenState extends State<TeamDetailScreen> {
   late final PageController _pageController;
+  final _scrollControllers = <String, ScrollController>{};
+  double _syncedScrollOffset = 0;
 
   @override
   void initState() {
@@ -26,9 +31,43 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
     _pageController = PageController(initialPage: widget.initialIndex);
   }
 
+  ScrollController _scrollFor(String clubCode) {
+    return _scrollControllers.putIfAbsent(clubCode, () {
+      final controller = ScrollController(
+        initialScrollOffset: _syncedScrollOffset,
+      );
+      controller.addListener(() {
+        if (!controller.hasClients) return;
+        _syncedScrollOffset = controller.offset;
+      });
+      return controller;
+    });
+  }
+
+  void _onPageChanged(int index) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || index < 0 || index >= widget.teams.length) return;
+      _applySyncedScroll(widget.teams[index].clubCode);
+    });
+  }
+
+  void _applySyncedScroll(String clubCode) {
+    final controller = _scrollControllers[clubCode];
+    if (controller == null || !controller.hasClients) return;
+
+    final maxExtent = controller.position.maxScrollExtent;
+    final target = _syncedScrollOffset.clamp(0.0, maxExtent);
+    if ((controller.offset - target).abs() > 0.5) {
+      controller.jumpTo(target);
+    }
+  }
+
   @override
   void dispose() {
     _pageController.dispose();
+    for (final controller in _scrollControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -36,6 +75,7 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
   Widget build(BuildContext context) {
     return PageView.builder(
       controller: _pageController,
+      onPageChanged: _onPageChanged,
       itemCount: widget.teams.length,
       itemBuilder: (context, index) {
         final team = widget.teams[index];
@@ -45,7 +85,9 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
             : null;
 
         return _TeamDetailPage(
+          key: ValueKey(team.clubCode),
           team: team,
+          scrollController: _scrollFor(team.clubCode),
           previousTeamName: previousTeam?.teamName,
           nextTeamName: nextTeam?.teamName,
         );
@@ -56,11 +98,14 @@ class _TeamDetailScreenState extends State<TeamDetailScreen> {
 
 class _TeamDetailPage extends StatefulWidget {
   final TeamStats team;
+  final ScrollController scrollController;
   final String? previousTeamName;
   final String? nextTeamName;
 
   const _TeamDetailPage({
+    super.key,
     required this.team,
+    required this.scrollController,
     this.previousTeamName,
     this.nextTeamName,
   });
@@ -77,13 +122,67 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
   static const double _gridWidth =
       _statCardWidth * _gridColumns + _gridSpacing * (_gridColumns - 1);
 
-  final _scrollController = ScrollController();
   final _rosterKey = GlobalKey();
+  bool _showCompactTitle = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollController.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _onScroll());
+  }
 
   @override
   void dispose() {
-    _scrollController.dispose();
+    widget.scrollController.removeListener(_onScroll);
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!widget.scrollController.hasClients) return;
+
+    final show =
+        widget.scrollController.offset > _kCompactHeaderScrollThreshold;
+    if (show != _showCompactTitle) {
+      setState(() => _showCompactTitle = show);
+    }
+  }
+
+  Widget _buildCompactAppBarTitle(TeamStats team) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          team.logo,
+          width: 28,
+          height: 28,
+          fit: BoxFit.contain,
+        ),
+        const SizedBox(width: 10),
+        Text(
+          team.teamName,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        if (team.position > 0) ...[
+          const SizedBox(width: 8),
+          Text(
+            '${team.position}.',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.55),
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ],
+    );
   }
 
   Future<void> _scrollToRoster() async {
@@ -105,10 +204,30 @@ class _TeamDetailPageState extends State<_TeamDetailPage> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(backgroundColor: Colors.black),
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        title: null,
+        automaticallyImplyLeading: true,
+        flexibleSpace: _showCompactTitle
+            ? SafeArea(
+                bottom: false,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 56),
+                    Expanded(
+                      child: Center(
+                        child: _buildCompactAppBarTitle(team),
+                      ),
+                    ),
+                    const SizedBox(width: 56),
+                  ],
+                ),
+              )
+            : null,
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
-          controller: _scrollController,
+          controller: widget.scrollController,
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,

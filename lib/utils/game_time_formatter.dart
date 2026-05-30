@@ -1,5 +1,19 @@
 class GameTimeFormatter {
   static const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  static const _months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
 
   static String formatScheduled(DateTime utcDate) {
     final local = utcDate.toLocal();
@@ -36,6 +50,31 @@ class GameTimeFormatter {
     }
 
     return '${formatRoundDay(first)} – ${formatRoundDay(last)}';
+  }
+
+  /// Compact range for narrow headers, e.g. `14–16 Mar` or `28 Mar – 2 Apr`.
+  static String formatRoundRangeCompact(List<DateTime> utcDates) {
+    if (utcDates.isEmpty) return '';
+
+    final sorted = utcDates.toList()..sort();
+    final first = sorted.first.toLocal();
+    final last = sorted.last.toLocal();
+
+    if (first.year == last.year &&
+        first.month == last.month &&
+        first.day == last.day) {
+      return _formatRoundDayCompact(first);
+    }
+
+    if (first.year == last.year && first.month == last.month) {
+      return '${first.day}–${last.day} ${_months[first.month - 1]}';
+    }
+
+    return '${_formatRoundDayCompact(first)} – ${_formatRoundDayCompact(last)}';
+  }
+
+  static String _formatRoundDayCompact(DateTime local) {
+    return '${local.day} ${_months[local.month - 1]}';
   }
 
   static String formatFull(DateTime utcDate) {

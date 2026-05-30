@@ -37,10 +37,27 @@ class GameRound {
 
   int get roundIndex => roundNumber - 1;
 
+  /// Short round badge for headers, e.g. `R38`.
+  String get roundBadge => 'R$roundNumber';
+
   String get dateLabel {
     if (games.isEmpty) return '';
     return GameTimeFormatter.formatRoundRange(
       games.map((game) => game.utcDate).toList(),
     );
+  }
+
+  String get compactDateLabel {
+    if (games.isEmpty) return '';
+    return GameTimeFormatter.formatRoundRangeCompact(
+      games.map((game) => game.utcDate).toList(),
+    );
+  }
+
+  /// One-line header: `R38 · 14–16 Mar`.
+  String get compactHeaderLabel {
+    final dates = compactDateLabel;
+    if (dates.isEmpty) return roundBadge;
+    return '$roundBadge · $dates';
   }
 }
