@@ -1,29 +1,42 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
+  /// Bright accent on dark backgrounds (nav, live badges, etc.).
   static const Color brandOrange = Color(0xFFFF9800);
+
+  /// Light accent — burnt orange on slate surfaces (readable, on-brand).
+  static const Color brandOrangeOnLight = Color(0xFFB45309);
+
+  /// Light mode: cool slate gray base (EuroLeague-style, low glare).
+  static const Color _lightSurface = Color(0xFF94A0AD);
+  static const Color _lightOnSurface = Color(0xFF25272A);
+  static const Color _lightOnSurfaceVariant = Color(0xFF484C52);
+  static const Color _lightOutline = Color(0xFF7E838A);
+  static const Color _lightCard = Color(0xFFA8B2BC);
+  static const Color _lightElevatedCard = Color(0xFF707986);
 
   static ThemeData get dark => _build(Brightness.dark);
   static ThemeData get light => _build(Brightness.light);
 
   static ThemeData _build(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
+    final primary = isDark ? brandOrange : brandOrangeOnLight;
     final colorScheme = ColorScheme(
       brightness: brightness,
-      primary: brandOrange,
-      onPrimary: Colors.black,
-      secondary: brandOrange,
-      onSecondary: Colors.black,
+      primary: primary,
+      onPrimary: isDark ? Colors.black : _lightOnSurface,
+      secondary: primary,
+      onSecondary: isDark ? Colors.black : _lightOnSurface,
       error: Colors.redAccent,
       onError: Colors.white,
-      surface: isDark ? Colors.black : const Color(0xFFF2F2F7),
-      onSurface: isDark ? Colors.white : const Color(0xFF1C1C1E),
-      onSurfaceVariant: isDark ? Colors.white70 : const Color(0xFF5C5C60),
-      outline: isDark ? const Color(0xFF48484A) : const Color(0xFFC7C7CC),
+      surface: isDark ? Colors.black : _lightSurface,
+      onSurface: isDark ? Colors.white : _lightOnSurface,
+      onSurfaceVariant: isDark ? Colors.white70 : _lightOnSurfaceVariant,
+      outline: isDark ? const Color(0xFF48484A) : _lightOutline,
       surfaceContainerHigh:
-          isDark ? const Color(0xFF1C1C1E) : Colors.white,
+          isDark ? const Color(0xFF1C1C1E) : _lightCard,
       surfaceContainerHighest:
-          isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE8E8ED),
+          isDark ? const Color(0xFF2C2C2E) : _lightElevatedCard,
     );
 
     return ThemeData(

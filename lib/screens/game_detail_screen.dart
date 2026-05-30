@@ -99,11 +99,11 @@ class _GameDetailScreenState extends State<GameDetailScreen>
     return _game.status.label;
   }
 
-  Color get _statusColor {
+  Color _statusColor(ColorScheme cs) {
     if (_game.status == GameDisplayStatus.live) {
       return Colors.redAccent;
     }
-    return AppTheme.brandOrange;
+    return cs.primary;
   }
 
   @override
@@ -124,7 +124,7 @@ class _GameDetailScreenState extends State<GameDetailScreen>
                 _statusLabel,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: _statusColor,
+                  color: _statusColor(cs),
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.1,
                 ),

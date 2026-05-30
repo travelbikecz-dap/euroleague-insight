@@ -166,11 +166,11 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     return _game.status.label;
   }
 
-  Color get _statusColor {
+  Color _statusColor(ColorScheme cs) {
     if (_game.status == GameDisplayStatus.live) {
       return Colors.redAccent;
     }
-    return AppTheme.brandOrange;
+    return cs.primary;
   }
 
   bool get _showPostGameSections {
@@ -225,6 +225,7 @@ class _MatchUpScreenState extends State<MatchUpScreen>
   }
 
   Widget _buildContent(BuildContext context) {
+    final cs = context.cs;
     final homeStats = _homeStats!;
     final awayStats = _awayStats!;
     final prediction = _prediction!;
@@ -239,7 +240,7 @@ class _MatchUpScreenState extends State<MatchUpScreen>
               _statusLabel,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: _statusColor,
+                color: _statusColor(cs),
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),

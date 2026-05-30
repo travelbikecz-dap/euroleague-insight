@@ -36,7 +36,7 @@ class GameCard extends StatelessWidget {
               Text(
                 _statusLabel(game),
                 style: TextStyle(
-                  color: _statusColor(game.status),
+                  color: _statusColor(context, game.status),
                   fontWeight: FontWeight.bold,
                   fontSize: 12,
                 ),
@@ -83,13 +83,13 @@ class GameCard extends StatelessWidget {
     return GameTimeFormatter.formatClock(game.utcDate);
   }
 
-  Color _statusColor(GameDisplayStatus status) {
+  Color _statusColor(BuildContext context, GameDisplayStatus status) {
     return switch (status) {
       GameDisplayStatus.live => Colors.redAccent,
       GameDisplayStatus.postponed ||
       GameDisplayStatus.suspended ||
       GameDisplayStatus.cancelled => Colors.grey,
-      _ => AppTheme.brandOrange,
+      _ => context.cs.primary,
     };
   }
 
