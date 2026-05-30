@@ -58,8 +58,14 @@ class TeamNames {
       case 'Partizan Mozzart Bet Belgrade':
         return 'Partizan';
 
+      case 'Real Madrid':
+        return 'Real Madrid';
+
       default:
         return apiName;
     }
   }
+
+  /// Display name for the compact Teams list (one line).
+  static String listName(String apiName) => shortName(apiName);
 }

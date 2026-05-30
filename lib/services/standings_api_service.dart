@@ -3,6 +3,7 @@ import '../models/standing.dart';
 import '../models/team.dart';
 import 'api_cache.dart';
 import 'euroleague_api_client.dart';
+import 'recent_form_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:xml/xml.dart';
 
@@ -20,34 +21,54 @@ class StandingsApiService {
       forceRefresh: forceRefresh,
     );
 
-    final cacheKey = 'standings_${seasonCode}_$standingRound';
+    const cacheVersion = 'v2';
+    final cacheKey = 'standings_${cacheVersion}_${seasonCode}_$standingRound';
     if (!forceRefresh) {
       final cached = ApiCache.instance.get<List<Standing>>(cacheKey);
       if (cached != null) return cached;
     }
 
+    final resultsUrl =
+        'https://api-live.euroleague.net/v1/results/?seasonCode=$seasonCode';
+    final resultsXml = await _getCachedXml(
+      resultsUrl,
+      cacheKey: 'results_xml_$seasonCode',
+      forceRefresh: forceRefresh,
+    );
+    final recentForms = RecentFormService.computeFromResultsXml(resultsXml);
+
     final data = await _client.getJson(
       'https://api-live.euroleague.net/v3/competitions/E/seasons/$seasonCode/rounds/$standingRound/basicstandings',
-      cacheKey: cacheKey,
+      cacheKey: '${cacheKey}_raw',
       cacheTtl: CacheDurations.liveData,
       forceRefresh: forceRefresh,
     );
 
     final List<Standing> standings = [];
+    final apiFormByClubCode = <String, List<String>>{};
+    final clubNames = <String, String>{};
 
     for (final team in data['teams'] as List<dynamic>) {
       final club = team['club'] as Map<String, dynamic>;
-      final last5Form = (team['last5Form'] as List<dynamic>? ?? [])
+      final clubCode = club['code'] as String? ?? '';
+      final clubName = club['name'] as String? ?? '';
+      final apiLast5Form = (team['last5Form'] as List<dynamic>? ?? [])
           .map((result) => result.toString())
           .toList();
+
+      clubNames[clubCode] = clubName;
+      apiFormByClubCode[clubCode] = apiLast5Form;
+
+      final last5Form =
+          recentForms.formByClubCode[clubCode] ?? apiLast5Form;
 
       standings.add(
         Standing(
           position: team['position'] as int? ?? standings.length + 1,
-          clubCode: club['code'] as String? ?? '',
+          clubCode: clubCode,
           team: Team(
-            name: club['name'] as String? ?? '',
-            logo: getLocalLogo(club['name'] as String? ?? ''),
+            name: clubName,
+            logo: getLocalLogo(clubName),
           ),
           wins: team['gamesWon'] as int? ?? 0,
           losses: team['gamesLost'] as int? ?? 0,
@@ -58,6 +79,12 @@ class StandingsApiService {
         ),
       );
     }
+
+    RecentFormService.logDebug(
+      computed: recentForms,
+      clubNames: clubNames,
+      apiFormByClubCode: apiFormByClubCode,
+    );
 
     ApiCache.instance.set(cacheKey, standings, CacheDurations.liveData);
     return standings;
@@ -133,11 +160,13 @@ class StandingsApiService {
 
   Future<List<String>> getRecentForm(
     String teamName, {
+    String? clubCode,
     bool forceRefresh = false,
   }) async {
-    final apiTeamName = getApiTeamName(teamName).toLowerCase();
     final seasonCode = getCurrentSeasonCode();
-    final cacheKey = 'recent_form_${seasonCode}_$apiTeamName';
+    final cacheKey = clubCode != null
+        ? 'recent_form_${seasonCode}_$clubCode'
+        : 'recent_form_${seasonCode}_${getApiTeamName(teamName).toLowerCase()}';
 
     if (!forceRefresh) {
       final cached = ApiCache.instance.get<List<String>>(cacheKey);
@@ -152,52 +181,22 @@ class StandingsApiService {
       forceRefresh: forceRefresh,
     );
 
-    final document = XmlDocument.parse(responseBody);
-    final games = document.findAllElements('game');
-    final List<Map<String, dynamic>> gamesData = [];
+    final recentForms = RecentFormService.computeFromResultsXml(responseBody);
 
-    for (final game in games) {
-      final homeTeam = game
-          .findElements('hometeam')
-          .first
-          .innerText
-          .toLowerCase();
-      final awayTeam = game
-          .findElements('awayteam')
-          .first
-          .innerText
-          .toLowerCase();
-      final homeScore =
-          int.tryParse(game.findElements('homescore').first.innerText) ?? 0;
-      final awayScore =
-          int.tryParse(game.findElements('awayscore').first.innerText) ?? 0;
-      final played = game.findElements('played').first.innerText == 'true';
-      final round = game.findElements('round').first.innerText;
+    final resolvedClubCode = clubCode ??
+        RecentFormService.findClubCodeForTeamName(
+          recentForms,
+          getApiTeamName(teamName),
+        );
 
-      if (!played || round != 'RS') continue;
-
-      final isTeamPlaying =
-          homeTeam == apiTeamName || awayTeam == apiTeamName;
-      if (!isTeamPlaying) continue;
-
-      final isWin = homeTeam == apiTeamName
-          ? homeScore > awayScore
-          : awayScore > homeScore;
-      final gameday =
-          int.tryParse(game.findElements('gameday').first.innerText) ?? 0;
-
-      gamesData.add({'gameday': gameday, 'result': isWin ? 'W' : 'L'});
+    if (resolvedClubCode != null) {
+      final form = recentForms.formByClubCode[resolvedClubCode] ?? const [];
+      ApiCache.instance.set(cacheKey, form, CacheDurations.liveData);
+      return form;
     }
 
-    gamesData.sort((a, b) => a['gameday'].compareTo(b['gameday']));
-
-    var form = gamesData.map((game) => game['result'] as String).toList();
-    if (form.length > 5) {
-      form = form.sublist(form.length - 5);
-    }
-
-    ApiCache.instance.set(cacheKey, form, CacheDurations.liveData);
-    return form;
+    ApiCache.instance.set(cacheKey, const [], CacheDurations.liveData);
+    return const [];
   }
 
   String getLocalLogo(String teamName) {

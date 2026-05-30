@@ -15,7 +15,8 @@ class PlayerStatsApiService {
     bool forceRefresh = false,
   }) async {
     final seasonCode = getCurrentSeasonCode();
-    final cacheKey = 'player_stats_${seasonCode}_${player.code}';
+    const cacheVersion = 'v2';
+    final cacheKey = 'player_stats_${cacheVersion}_${seasonCode}_${player.code}';
 
     if (!forceRefresh) {
       final cached = ApiCache.instance.get<PlayerSeasonStats>(cacheKey);
@@ -31,7 +32,16 @@ class PlayerStatsApiService {
 
     if (data.isEmpty) return null;
 
-    final competition = data.first as Map<String, dynamic>;
+    Map<String, dynamic>? competition;
+    for (final entry in data.whereType<Map>()) {
+      final item = Map<String, dynamic>.from(entry);
+      if (item['competitionCode'] == 'E') {
+        competition = item;
+        break;
+      }
+    }
+    competition ??= Map<String, dynamic>.from(data.first as Map);
+
     final seasons = competition['seasons'] as List<dynamic>? ?? [];
 
     Map<String, dynamic>? seasonEntry;
@@ -67,6 +77,8 @@ class PlayerStatsApiService {
       steals: _d(stats, 'steals') / gamesPlayed,
       blocks: _d(stats, 'blocksFavour') / gamesPlayed,
       turnovers: _d(stats, 'turnovers') / gamesPlayed,
+      offensiveRebounds: _d(stats, 'offensiveRebounds') / gamesPlayed,
+      defensiveRebounds: _d(stats, 'defensiveRebounds') / gamesPlayed,
       pir: _d(stats, 'valuation') / gamesPlayed,
       plusMinus: _d(stats, 'plusMinus') / gamesPlayed,
       fieldGoalPercentage: StatsCalculator.formatPercentage(

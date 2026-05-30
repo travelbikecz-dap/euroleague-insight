@@ -14,7 +14,7 @@ class RosterApiService {
     bool forceRefresh = false,
   }) async {
     final seasonCode = getCurrentSeasonCode();
-    const cacheVersion = 'v2';
+    const cacheVersion = 'v3';
     final cacheKey = 'roster_${cacheVersion}_${seasonCode}_$clubCode';
 
     if (!forceRefresh) {

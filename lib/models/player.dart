@@ -8,8 +8,11 @@ class Player {
   final String dorsal;
   final String position;
   final String country;
+  final String birthCountry;
+  final String lastTeam;
   final int height;
   final int weight;
+  final DateTime? birthDate;
 
   Player({
     required this.code,
@@ -19,13 +22,17 @@ class Player {
     required this.dorsal,
     required this.position,
     required this.country,
+    required this.birthCountry,
+    required this.lastTeam,
     required this.height,
     required this.weight,
+    required this.birthDate,
   });
 
   factory Player.fromRosterJson(Map<String, dynamic> json) {
     final person = Map<String, dynamic>.from(json['person'] as Map);
     final country = person['country'] as Map<String, dynamic>?;
+    final birthCountry = person['birthCountry'] as Map<String, dynamic>?;
     final apiName = person['name'] as String? ?? '';
 
     return Player(
@@ -37,9 +44,17 @@ class Player {
       dorsal: json['dorsal'] as String? ?? '',
       position: json['positionName'] as String? ?? '',
       country: country?['name'] as String? ?? '',
+      birthCountry: birthCountry?['name'] as String? ?? '',
+      lastTeam: json['lastTeam'] as String? ?? '',
       height: person['height'] as int? ?? 0,
       weight: person['weight'] as int? ?? 0,
+      birthDate: _parseBirthDate(person['birthDate'] as String?),
     );
+  }
+
+  static DateTime? _parseBirthDate(String? value) {
+    if (value == null || value.isEmpty) return null;
+    return DateTime.tryParse(value);
   }
 
   static String? _extractPhotoUrl(Object? imagesRaw) {
@@ -84,6 +99,8 @@ class PlayerSeasonStats {
   final double steals;
   final double blocks;
   final double turnovers;
+  final double offensiveRebounds;
+  final double defensiveRebounds;
   final double pir;
   final double plusMinus;
   final String fieldGoalPercentage;
@@ -101,6 +118,8 @@ class PlayerSeasonStats {
     required this.steals,
     required this.blocks,
     required this.turnovers,
+    required this.offensiveRebounds,
+    required this.defensiveRebounds,
     required this.pir,
     required this.plusMinus,
     required this.fieldGoalPercentage,
@@ -108,29 +127,22 @@ class PlayerSeasonStats {
     required this.freeThrowPercentage,
   });
 
-  List<PlayerStatItem> get overviewStats => [
+  List<PlayerStatItem> get seasonStats => [
     PlayerStatItem(label: 'GP', value: gamesPlayed.toString()),
     PlayerStatItem(label: 'MIN', value: _n(minutesPerGame)),
     PlayerStatItem(label: 'PTS', value: _n(ppg)),
+    PlayerStatItem(label: 'PIR', value: _n(pir)),
     PlayerStatItem(label: 'REB', value: _n(rebounds)),
+    PlayerStatItem(label: 'OREB', value: _n(offensiveRebounds)),
+    PlayerStatItem(label: 'DREB', value: _n(defensiveRebounds)),
     PlayerStatItem(label: 'AST', value: _n(assists)),
     PlayerStatItem(label: 'STL', value: _n(steals)),
-  ];
-
-  List<PlayerStatItem> get advancedStats => [
     PlayerStatItem(label: 'BLK', value: _n(blocks)),
     PlayerStatItem(label: 'TOV', value: _n(turnovers)),
-    PlayerStatItem(label: 'PIR', value: _n(pir)),
-    PlayerStatItem(label: '+/-', value: _signed(plusMinus)),
     PlayerStatItem(label: 'FG%', value: fieldGoalPercentage),
     PlayerStatItem(label: '3P%', value: threePointPercentage),
     PlayerStatItem(label: 'FT%', value: freeThrowPercentage),
   ];
 
   String _n(double value) => value.toStringAsFixed(1);
-
-  String _signed(double value) {
-    final prefix = value > 0 ? '+' : '';
-    return '$prefix${value.toStringAsFixed(1)}';
-  }
 }

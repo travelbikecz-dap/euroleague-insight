@@ -18,7 +18,7 @@ class TeamStatsApiService {
   final StandingsApiService _standingsApi;
 
   Future<List<TeamStats>> fetchAllTeamStats({bool forceRefresh = false}) async {
-    const cacheVersion = 'v2';
+    const cacheVersion = 'v3';
     final cacheKey = 'team_stats_${cacheVersion}_${getCurrentSeasonCode()}';
     if (!forceRefresh) {
       final cached = ApiCache.instance.get<List<TeamStats>>(cacheKey);

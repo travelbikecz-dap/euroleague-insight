@@ -83,7 +83,14 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
             }
 
             return Column(
-              children: players.map((player) => _buildPlayerRow(context, player)).toList(),
+              children: players.asMap().entries.map((entry) {
+                return _buildPlayerRow(
+                  context,
+                  players: players,
+                  index: entry.key,
+                  player: entry.value,
+                );
+              }).toList(),
             );
           },
         ),
@@ -91,13 +98,19 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
     );
   }
 
-  Widget _buildPlayerRow(BuildContext context, Player player) {
+  Widget _buildPlayerRow(
+    BuildContext context, {
+    required List<Player> players,
+    required int index,
+    required Player player,
+  }) {
     return InkWell(
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (_) => PlayerDetailScreen(
-              player: player,
+              players: players,
+              initialIndex: index,
               teamName: widget.teamName,
             ),
           ),
@@ -115,7 +128,7 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
           children: [
             PlayerAvatar(
               photoUrl: player.photoUrl,
-              size: 44,
+              style: PlayerPhotoStyle.compact,
               fallbackText: player.dorsal.isNotEmpty ? '#${player.dorsal}' : '?',
             ),
             const SizedBox(width: 12),
