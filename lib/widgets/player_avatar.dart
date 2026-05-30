@@ -81,11 +81,7 @@ class PlayerAvatar extends StatelessWidget {
     return Container(
       width: _width,
       height: _height,
-      decoration: BoxDecoration(
-        color: context.elevatedCard,
-        borderRadius: BorderRadius.circular(_borderRadius),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
-      ),
+      decoration: context.elevatedCardDecoration(radius: _borderRadius),
       alignment: Alignment.center,
       child: Text(
         fallbackText ?? '?',

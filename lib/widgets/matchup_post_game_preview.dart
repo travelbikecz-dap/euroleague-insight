@@ -71,11 +71,7 @@ class MatchupPostGamePreview extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
-      ),
+      decoration: context.cardDecoration(radius: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -184,11 +180,7 @@ class MatchupPostGamePreview extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
-      ),
+      decoration: context.cardDecoration(radius: 12),
       child: Text(
         preview.analysis,
         textAlign: TextAlign.left,

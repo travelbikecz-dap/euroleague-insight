@@ -166,11 +166,11 @@ class _MatchUpScreenState extends State<MatchUpScreen>
     return _game.status.label;
   }
 
-  Color _statusColor(ColorScheme cs) {
+  Color _statusColor(BuildContext context) {
     if (_game.status == GameDisplayStatus.live) {
       return Colors.redAccent;
     }
-    return cs.primary;
+    return context.statusHighlightColor;
   }
 
   bool get _showPostGameSections {
@@ -225,7 +225,6 @@ class _MatchUpScreenState extends State<MatchUpScreen>
   }
 
   Widget _buildContent(BuildContext context) {
-    final cs = context.cs;
     final homeStats = _homeStats!;
     final awayStats = _awayStats!;
     final prediction = _prediction!;
@@ -240,7 +239,7 @@ class _MatchUpScreenState extends State<MatchUpScreen>
               _statusLabel,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: _statusColor(cs),
+                color: _statusColor(context),
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               ),
@@ -405,16 +404,10 @@ class _MatchUpScreenState extends State<MatchUpScreen>
   }
 
   Widget _surfaceCard(BuildContext context, {required Widget child}) {
-    final cs = context.cs;
-
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
-      ),
+      decoration: context.cardDecoration(radius: 12),
       child: child,
     );
   }
@@ -552,11 +545,7 @@ class _MatchUpScreenState extends State<MatchUpScreen>
       width: 128,
       margin: const EdgeInsets.only(right: 8),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-      decoration: BoxDecoration(
-        color: context.elevatedCard,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
-      ),
+      decoration: context.elevatedCardDecoration(radius: 12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

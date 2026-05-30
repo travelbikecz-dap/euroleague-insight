@@ -328,11 +328,7 @@ class _PlayerDetailPage extends StatelessWidget {
         Container(
           width: _gridWidth,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: context.cardColor,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
-          ),
+          decoration: context.cardDecoration(radius: 12),
           child: Column(
             children: rows
                 .map(
@@ -464,11 +460,7 @@ class _PlayerDetailPage extends StatelessWidget {
     return Container(
       width: _statCardWidth,
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
-      ),
+      decoration: context.cardDecoration(radius: 12),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

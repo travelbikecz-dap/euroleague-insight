@@ -123,13 +123,7 @@ class _TeamRosterSectionState extends State<TeamRosterSection> {
       child: Container(
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: context.cardColor,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: context.cs.outline.withValues(alpha: 0.3),
-          ),
-        ),
+        decoration: context.cardDecoration(radius: 12),
         child: Row(
           children: [
             PlayerAvatar(

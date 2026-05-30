@@ -30,11 +30,7 @@ class MatchupMvpPreview extends StatelessWidget {
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: context.cardColor,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
-          ),
+          decoration: context.cardDecoration(radius: 12),
           child: isPending
               ? _pendingContent(context)
               : _mvpContent(context, mvp!),
@@ -325,11 +321,7 @@ class MatchupMvpPreview extends StatelessWidget {
           vertical: compact ? 8 : 10,
           horizontal: compact ? 4 : 6,
         ),
-        decoration: BoxDecoration(
-          color: context.elevatedCard,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: cs.outline.withValues(alpha: 0.25)),
-        ),
+        decoration: context.elevatedCardDecoration(radius: 12),
         child: Column(
           children: [
             Text(

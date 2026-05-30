@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// Logos that are light/white on transparency and need a dark pad in light mode.
+import '../theme/app_theme.dart';
+
+/// Logos with white/light lettering on transparency — dark pad in light mode.
 const _lightBackdropLogos = {
   'assets/logos/lyon.png', // ASVEL
+  'assets/logos/barcelona.png',
+  'assets/logos/munich.png', // Bayern
 };
 
 class TeamLogo extends StatelessWidget {
@@ -56,7 +60,7 @@ class TeamLogo extends StatelessWidget {
       height: h,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: const Color(0xFF1B1B2E),
+        color: AppTheme.logoBackdropLight,
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       child: image,

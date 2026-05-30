@@ -99,11 +99,11 @@ class _GameDetailScreenState extends State<GameDetailScreen>
     return _game.status.label;
   }
 
-  Color _statusColor(ColorScheme cs) {
+  Color _statusColor(BuildContext context) {
     if (_game.status == GameDisplayStatus.live) {
       return Colors.redAccent;
     }
-    return cs.primary;
+    return context.statusHighlightColor;
   }
 
   @override
@@ -124,7 +124,7 @@ class _GameDetailScreenState extends State<GameDetailScreen>
                 _statusLabel,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: _statusColor(cs),
+                  color: _statusColor(context),
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.1,
                 ),
@@ -154,11 +154,7 @@ class _GameDetailScreenState extends State<GameDetailScreen>
               const SizedBox(height: 32),
               Container(
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: context.cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: cs.outline.withValues(alpha: 0.35)),
-                ),
+                decoration: context.cardDecoration(radius: 12),
                 child: Text(
                   'MatchUp and predictions coming in a future update.',
                   textAlign: TextAlign.center,

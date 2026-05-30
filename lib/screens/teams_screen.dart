@@ -120,10 +120,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                       horizontal: 12,
                       vertical: 10,
                     ),
-                    decoration: BoxDecoration(
-                      color: cs.surfaceContainerHigh,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    decoration: context.cardDecoration(radius: 12),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [

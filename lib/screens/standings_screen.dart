@@ -239,13 +239,14 @@ class _StandingRowCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: Material(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: context.cardDecoration(radius: 12),
         clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: IntrinsicHeight(
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            child: IntrinsicHeight(
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -321,6 +322,7 @@ class _StandingRowCard extends StatelessWidget {
               ],
             ),
           ),
+        ),
         ),
       ),
     );

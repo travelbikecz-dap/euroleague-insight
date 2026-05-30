@@ -26,10 +26,7 @@ class GameCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: context.cardColor,
-            borderRadius: BorderRadius.circular(20),
-          ),
+          decoration: context.cardDecoration(radius: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -89,7 +86,7 @@ class GameCard extends StatelessWidget {
       GameDisplayStatus.postponed ||
       GameDisplayStatus.suspended ||
       GameDisplayStatus.cancelled => Colors.grey,
-      _ => context.cs.primary,
+      _ => context.statusHighlightColor,
     };
   }
 
